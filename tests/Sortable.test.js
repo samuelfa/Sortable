@@ -35,7 +35,7 @@ async function dragByOffset(
 
 test.describe('Simple Sorting', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('single-list.html');
+		await page.goto('/tests/single-list.html');
 	});
 
 	test('Sort down list', async ({ page }) => {
@@ -190,7 +190,7 @@ test.describe('Simple Sorting', () => {
 
 test.describe('Grouping', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('dual-list.html');
+		await page.goto('/tests/dual-list.html');
 	});
 
 	test('Move to list of the same group', async ({ page }) => {
@@ -330,7 +330,7 @@ test.describe('Grouping', () => {
 
 test.describe('Handles', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('handles.html');
+		await page.goto('/tests/handles.html');
 	});
 
 	test('Do not allow dragging not using handle', async ({ page }) => {
@@ -370,7 +370,7 @@ test.describe('Handles', () => {
 
 test.describe('Filter', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('filter.html');
+		await page.goto('/tests/filter.html');
 	});
 
 	test('Do not allow dragging of filtered element', async ({ page }) => {
@@ -409,7 +409,7 @@ test.describe('Filter', () => {
 
 test.describe('Nested', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('nested.html');
+		await page.goto('/tests/nested.html');
 	});
 
 	test('Dragging from level 1 to level 0', async ({ page }) => {
@@ -457,7 +457,7 @@ test.describe('Nested', () => {
 
 test.describe('Empty Insert', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('empty-list.html');
+		await page.goto('/tests/empty-list.html');
 	});
 
 	test('Insert into empty list if within emptyInsertThreshold', async ({
