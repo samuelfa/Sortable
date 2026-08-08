@@ -18,10 +18,10 @@ export const test = base.extend({
 			if (isDocument) {
 				const status = response.status();
 				if (status >= 300) {
-                   const redirectTo = response.headers()['location'] || 'Desconocido';
-                   console.log(`\n🔴 HTTP ${status} en la petición:`);
-                   console.log(`   URL solicitada: ${url}`);
-                   console.log(`   Redirige a:     ${redirectTo}\n`);
+					const redirectTo = response.headers()['location'] || 'Desconocido';
+					console.log(`\n🔴 HTTP ${status} en la petición:`);
+					console.log(`   URL solicitada: ${url}`);
+					console.log(`   Redirige a:     ${redirectTo}\n`);
 				}
 				expect(response.status()).toBe(200);
 			}
