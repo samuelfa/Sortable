@@ -11,11 +11,11 @@ export default defineConfig({
 	/* Opt out of parallel tests on CI to ensure stability */
 	workers: process.env.CI ? 1 : undefined,
 
-    timeout: 10 * 1000,
+	timeout: 10 * 1000,
 
-    expect: {
-      timeout: 5 * 1000,
-    },
+	expect: {
+		timeout: 5 * 1000,
+	},
 	/* Detailed HTML reporter */
 	reporter: process.env.CI ? 'github' : 'list',
 
@@ -27,9 +27,9 @@ export default defineConfig({
 
 		/* Collect trace when retrying the failed test for easier debugging */
 		trace: 'on-first-retry',
-        actionTimeout: 5 * 1000,
+		actionTimeout: 5 * 1000,
 		navigationTimeout: 5 * 1000,
-		
+
 		/* Enable touch events (essential for SortableJS mobile testing) */
 		hasTouch: true,
 	},
