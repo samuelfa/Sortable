@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Simple Sorting', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/single-list.html');
+    await page.goto('single-list.html');
   });
 
   test('Sort down list', async ({ page }) => {
