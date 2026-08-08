@@ -23,7 +23,7 @@ export default defineConfig({
 		headless: true,
 
 		/* Base URL for the local testing server */
-		baseURL: 'http://localhost:8080/tests',
+		baseURL: 'http://localhost:8080',
 
 		/* Collect trace when retrying the failed test for easier debugging */
 		trace: 'on-first-retry',
