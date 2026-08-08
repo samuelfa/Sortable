@@ -27,6 +27,13 @@ export default defineConfig({
     hasTouch: true,
   },
 
+  webServer: {
+    command: 'npx serve . -p 8080',
+    port: 8080,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
+
   /* Configure projects for major browsers */
   projects: [
     {
