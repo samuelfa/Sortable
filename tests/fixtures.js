@@ -1,7 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 
 export const test = base.extend({
-	page: async ({ page }, use) => {
+	page: async ({ page }, use, testInfo) => {
 		const logs = [];
 
 		// 1. Capturar errores JS de la página y de consola
