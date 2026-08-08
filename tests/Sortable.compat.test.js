@@ -2,7 +2,7 @@ import { test, expect } from './fixtures.js';
 
 test.describe('Simple Sorting', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('single-list.html');
+		await page.goto('/tests/single-list.html');
 	});
 
 	test('Sort down list', async ({ page }) => {
