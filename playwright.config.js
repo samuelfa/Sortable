@@ -21,7 +21,7 @@ export default defineConfig({
 
 	use: {
 		headless: true,
-
+        viewport: { width: 1280, height: 720 },
 		/* Base URL for the local testing server */
 		baseURL: 'http://localhost:8080',
 
@@ -29,9 +29,6 @@ export default defineConfig({
 		trace: 'on-first-retry',
 		actionTimeout: 5 * 1000,
 		navigationTimeout: 5 * 1000,
-
-		/* Enable touch events (essential for SortableJS mobile testing) */
-		hasTouch: true,
 	},
 
 	webServer: {
@@ -46,14 +43,23 @@ export default defineConfig({
 		{
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] },
+			hasTouch: false, // Forzar comportamiento de ratón/escritorio
 		},
 		{
 			name: 'firefox',
 			use: { ...devices['Desktop Firefox'] },
+			hasTouch: false, // Forzar comportamiento de ratón/escritorio
 		},
 		{
 			name: 'webkit',
 			use: { ...devices['Desktop Safari'] },
+			hasTouch: false, // Forzar comportamiento de ratón/escritorio
 		},
+		{
+            name: 'mobile-touch',
+            use: { ...devices['Pixel 5'] }, // Emula pantalla táctil y eventos touch reales
+            hasTouch: true,
+      },
+    },
 	],
 });
