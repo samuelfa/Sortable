@@ -93,15 +93,19 @@ test.describe('Simple Sorting', () => {
 		const sourceBox = await dragStartPosition.boundingBox();
 		const targetBox = await targetStartPosition.boundingBox();
 		const calculatedOffset = Math.round((itemHeight / 2) * 0.4 - leeway);
-		
+
 		console.log('=== MATH DIAGNOSTICS ===');
 		console.log(`itemHeight (constant): ${itemHeight}`);
 		console.log(`leeway (constant): ${leeway}`);
 		console.log(`Calculated Offset Y: ${calculatedOffset}px`);
 		console.log(`Source Box Real Height: ${sourceBox?.height}px`);
 		console.log(`Target Box Real Height: ${targetBox?.height}px`);
-		console.log(`Target Y Center: ${targetBox ? targetBox.y + targetBox.height / 2 : 0}px`);
-		console.log(`Final Mouse Y Target: ${targetBox ? targetBox.y + targetBox.height / 2 + calculatedOffset : 0}px`);
+		console.log(
+			`Target Y Center: ${targetBox ? targetBox.y + targetBox.height / 2 : 0}px`
+		);
+		console.log(
+			`Final Mouse Y Target: ${targetBox ? targetBox.y + targetBox.height / 2 + calculatedOffset : 0}px`
+		);
 		console.log('========================');
 
 		// Below swap threshold - should NOT swap
