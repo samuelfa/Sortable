@@ -1,85 +1,64 @@
 {
-	"name": "sortablejs",
-	"exportName": "Sortable",
-	"version": "1.15.7",
-	"type": "module",
-	"description": "JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery required. Supports Meteor, AngularJS, React, Polymer, Vue, Knockout and any CSS library, e.g. Bootstrap.",
-	"main": "./Sortable.min.js",
-	"module": "modular/sortable.esm.js",
-	"scripts": {
-		"build:umd": "cross-env NODE_ENV=umd rollup -c ./scripts/umd-build.js",
-		"build:umd:watch": "cross-env NODE_ENV=umd rollup -w -c ./scripts/umd-build.js",
-		"build:es": "cross-env NODE_ENV=es rollup -c ./scripts/esm-build.js",
-		"build:es:watch": "cross-env NODE_ENV=es rollup -w -c ./scripts/esm-build.js",
-		"minify": "node ./scripts/minify.js",
-		"build": "npm run build:es && npm run build:umd && npm run minify",
-		"lint": "eslint .",
-		"lint:fix": "eslint . --fix",
-		"test": "playwright test",
-		"test:ui": "playwright test --ui",
-		"test:debug": "playwright test --debug"
-	},
-	"devDependencies": {
-		"@babel/core": "^7.26.9",
-		"@babel/plugin-transform-object-assign": "^7.24.7",
-		"@babel/preset-env": "^7.26.9",
-		"@playwright/test": "^1.62.1",
-		"@rollup/plugin-babel": "^6.0.4",
-		"@rollup/plugin-json": "^6.1.0",
-		"@rollup/plugin-node-resolve": "^16.0.0",
-		"cross-env": "^7.0.3",
-		"eslint": "^10.0.0",
-		"globals": "^16.0.0",
-		"http-server": "^14.1.1",
-		"rollup": "^4.34.8",
-		"uglify-js": "^3.19.3"
-	},
-	"maintainers": [
-		"Konstantin Lebedev <ibnRubaXa@gmail.com>",
-		"Owen Mills <owen23355@gmail.com>"
-	],
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/SortableJS/Sortable.git"
-	},
-	"files": [
-		"Sortable.js",
-		"Sortable.min.js",
-		"modular/",
-		"src/"
-	],
-	"keywords": [
-		"sortable",
-		"reorder",
-		"drag",
-		"meteor",
-		"angular",
-		"ng-sortable",
-		"react",
-		"vue",
-		"mixin"
-	],
-	"license": "MIT"
-}
-		"type": "git",
-		"url": "git://github.com/SortableJS/Sortable.git"
-	},
-	"files": [
-		"Sortable.js",
-		"Sortable.min.js",
-		"modular/",
-		"src/"
-	],
-	"keywords": [
-		"sortable",
-		"reorder",
-		"drag",
-		"meteor",
-		"angular",
-		"ng-sortable",
-		"react",
-		"vue",
-		"mixin"
-	],
-	"license": "MIT"
+  "name": "sortablejs",
+  "exportName": "Sortable",
+  "version": "1.15.7",
+  "type": "module",
+  "description": "JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery required. Supports Meteor, AngularJS, React, Polymer, Vue, Knockout and any CSS library, e.g. Bootstrap.",
+  "main": "./Sortable.min.js",
+  "module": "modular/sortable.esm.js",
+  "scripts": {
+    "build:umd": "cross-env NODE_ENV=umd rollup -c ./scripts/umd-build.js",
+    "build:umd:watch": "cross-env NODE_ENV=umd rollup -w -c ./scripts/umd-build.js",
+    "build:es": "cross-env NODE_ENV=es rollup -c ./scripts/esm-build.js",
+    "build:es:watch": "cross-env NODE_ENV=es rollup -w -c ./scripts/esm-build.js",
+    "minify": "node ./scripts/minify.js",
+    "build": "npm run build:es && npm run build:umd && npm run minify",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/plugin-transform-object-assign": "^7.24.7",
+    "@babel/preset-env": "^7.26.9",
+    "@playwright/test": "^1.62.1",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^10.0.0",
+    "globals": "^16.0.0",
+    "http-server": "^14.1.1",
+    "rollup": "^4.34.8",
+    "uglify-js": "^3.19.3"
+  },
+  "maintainers": [
+    "Konstantin Lebedev <ibnRubaXa@gmail.com>",
+    "Owen Mills <owen23355@gmail.com>",
+    "Samuel Fernández <samuel84fa@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SortableJS/Sortable.git"
+  },
+  "files": [
+    "Sortable.js",
+    "Sortable.min.js",
+    "modular/",
+    "src/"
+  ],
+  "keywords": [
+    "sortable",
+    "reorder",
+    "drag",
+    "meteor",
+    "angular",
+    "ng-sortable",
+    "react",
+    "vue",
+    "mixin"
+  ],
+  "license": "MIT"
 }
