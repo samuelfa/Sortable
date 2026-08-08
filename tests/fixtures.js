@@ -16,6 +16,12 @@ export const test = base.extend({
 		page.on('response', (response) => {
 			const isDocument = response.request().resourceType() === 'document';
 			if (isDocument) {
+				if (status >= 300) {
+                   const redirectTo = response.headers()['location'] || 'Desconocido';
+                   console.log(`\n🔴 HTTP ${status} en la petición:`);
+                   console.log(`   URL solicitada: ${url}`);
+                   console.log(`   Redirige a:     ${redirectTo}\n`);
+				}
 				expect(response.status()).toBe(200);
 			}
 		});
