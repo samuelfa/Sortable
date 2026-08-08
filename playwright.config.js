@@ -59,7 +59,6 @@ export default defineConfig({
             name: 'mobile-touch',
             use: { ...devices['Pixel 5'] }, // Emula pantalla táctil y eventos touch reales
             hasTouch: true,
-      },
-    },
+        }
 	],
 });
