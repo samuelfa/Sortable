@@ -12,9 +12,11 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   
   /* Detailed HTML reporter */
-  reporter: [['html', { open: 'never' }], ['list']],
+  reporter: process.env.CI ? 'github' : 'list',
 
   use: {
+    headless: true,
+
     /* Base URL for the local testing server */
     baseURL: 'http://localhost:8080',
 
