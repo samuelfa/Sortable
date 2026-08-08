@@ -14,17 +14,16 @@ export const test = base.extend({
 
 		// 2. Interceptar navegaciones y validar HTTP 200 automáticamente
 		page.on('response', (response) => {
-			const isDocument = response.request().resourceType() === 'document';
-			if (isDocument) {
-				const status = response.status();
-				if (status >= 300) {
-					const redirectTo = response.headers()['location'] || 'Desconocido';
-					console.log(`\n🔴 HTTP ${status} en la petición:`);
-					console.log(`   URL solicitada: ${url}`);
-					console.log(`   Redirige a:     ${redirectTo}\n`);
-				}
-				expect(response.status()).toBe(200);
+			const status = response.status();
+			const url = response.url();
+
+			if (status >= 300) {
+				const redirectTo = response.headers()['location'] || 'Desconocido';
+				console.log(`\n🔴 HTTP ${status} en la petición:`);
+				console.log(`   URL solicitada: ${url}`);
+				console.log(`   Redirige a:     ${redirectTo}\n`);
 			}
+			expect(response.status()).toBe(200);
 		});
 
 		await use(page);
