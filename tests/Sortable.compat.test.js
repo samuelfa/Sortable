@@ -47,6 +47,3 @@ test.describe('Simple Sorting', () => {
     await expect(targetEndPosition).toHaveText(targetText);
   });
 });
-		.expect(dragEndPosition.innerText).eql(dragEl.innerText)
-		.expect(targetEndPosition.innerText).eql(target.innerText);
-});
