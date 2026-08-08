@@ -1,19 +1,21 @@
 import { getChild } from '../../src/utils.js';
 
-
-const drop = function({
+const drop = function ({
 	originalEvent,
 	putSortable,
 	dragEl,
 	activeSortable,
 	dispatchSortableEvent,
 	hideGhostForTarget,
-	unhideGhostForTarget
+	unhideGhostForTarget,
 }) {
 	if (!originalEvent) return;
 	let toSortable = putSortable || activeSortable;
 	hideGhostForTarget();
-	let touch = originalEvent.changedTouches && originalEvent.changedTouches.length ? originalEvent.changedTouches[0] : originalEvent;
+	let touch =
+		originalEvent.changedTouches && originalEvent.changedTouches.length
+			? originalEvent.changedTouches[0]
+			: originalEvent;
 	let target = document.elementFromPoint(touch.clientX, touch.clientY);
 	unhideGhostForTarget();
 	if (toSortable && !toSortable.el.contains(target)) {
@@ -46,13 +48,12 @@ Revert.prototype = {
 			putSortable.animateAll();
 		}
 	},
-	drop
+	drop,
 };
 
 Object.assign(Revert, {
-	pluginName: 'revertOnSpill'
+	pluginName: 'revertOnSpill',
 });
-
 
 function Remove() {}
 
@@ -63,17 +64,13 @@ Remove.prototype = {
 		dragEl.parentNode && dragEl.parentNode.removeChild(dragEl);
 		parentSortable.animateAll();
 	},
-	drop
+	drop,
 };
 
 Object.assign(Remove, {
-	pluginName: 'removeOnSpill'
+	pluginName: 'removeOnSpill',
 });
-
 
 export default [Remove, Revert];
 
-export {
-	Remove as RemoveOnSpill,
-	Revert as RevertOnSpill
-};
+export { Remove as RemoveOnSpill, Revert as RevertOnSpill };

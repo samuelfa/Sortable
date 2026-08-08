@@ -2,16 +2,23 @@ import { IE11OrLess, Edge } from './BrowserInfo.js';
 import { expando } from './utils.js';
 import PluginManager from './PluginManager.js';
 
-export default function dispatchEvent(
-	{
-		sortable, rootEl, name,
-		targetEl, cloneEl, toEl, fromEl,
-		oldIndex, newIndex,
-		oldDraggableIndex, newDraggableIndex,
-		originalEvent, putSortable, extraEventProperties
-	}
-) {
-	sortable = (sortable || (rootEl && rootEl[expando]));
+export default function dispatchEvent({
+	sortable,
+	rootEl,
+	name,
+	targetEl,
+	cloneEl,
+	toEl,
+	fromEl,
+	oldIndex,
+	newIndex,
+	oldDraggableIndex,
+	newDraggableIndex,
+	originalEvent,
+	putSortable,
+	extraEventProperties,
+}) {
+	sortable = sortable || (rootEl && rootEl[expando]);
 	if (!sortable) return;
 
 	let evt,
@@ -21,7 +28,7 @@ export default function dispatchEvent(
 	if (window.CustomEvent && !IE11OrLess && !Edge) {
 		evt = new CustomEvent(name, {
 			bubbles: true,
-			cancelable: true
+			cancelable: true,
 		});
 	} else {
 		evt = document.createEvent('Event');
@@ -42,7 +49,10 @@ export default function dispatchEvent(
 	evt.originalEvent = originalEvent;
 	evt.pullMode = putSortable ? putSortable.lastPutMode : undefined;
 
-	let allEventProperties = { ...extraEventProperties, ...PluginManager.getEventProperties(name, sortable) };
+	let allEventProperties = {
+		...extraEventProperties,
+		...PluginManager.getEventProperties(name, sortable),
+	};
 	for (let option in allEventProperties) {
 		evt[option] = allEventProperties[option];
 	}

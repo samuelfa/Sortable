@@ -7,7 +7,7 @@ export default [
 		output: {
 			...build.output,
 			file: './Sortable.js',
-			format: 'umd'
-		}
-	}
+			format: 'umd',
+		},
+	},
 ];

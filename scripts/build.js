@@ -6,13 +6,13 @@ import banner from './banner.js';
 export default {
 	output: {
 		banner,
-		name: 'Sortable'
+		name: 'Sortable',
 	},
 	plugins: [
 		json(),
 		babel({
-			babelHelpers: 'bundled'
+			babelHelpers: 'bundled',
 		}),
-		resolve()
-	]
+		resolve(),
+	],
 };
