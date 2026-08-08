@@ -21,7 +21,7 @@ export default defineConfig({
 
 	use: {
 		headless: true,
-        viewport: { width: 1280, height: 720 },
+		viewport: { width: 1280, height: 720 },
 		/* Base URL for the local testing server */
 		baseURL: 'http://localhost:8080',
 
@@ -56,9 +56,9 @@ export default defineConfig({
 			hasTouch: false, // Forzar comportamiento de ratón/escritorio
 		},
 		{
-            name: 'mobile-touch',
-            use: { ...devices['Pixel 5'] }, // Emula pantalla táctil y eventos touch reales
-            hasTouch: true,
-        }
+			name: 'mobile-touch',
+			use: { ...devices['Pixel 5'] }, // Emula pantalla táctil y eventos touch reales
+			hasTouch: true,
+		},
 	],
 });
