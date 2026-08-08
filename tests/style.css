@@ -1,7 +1,7 @@
 /* Ensures fixed, deterministic dimensions across operating systems to prevent calculation rounding errors in CI tests */
 .list > div {
 	box-sizing: border-box;
-	height: 50px;
+	height: 54px;
 	border-style: solid;
 	border-width: 2px;
 	text-align: center;
