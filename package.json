@@ -30,6 +30,8 @@
     "cross-env": "^7.0.3",
     "eslint": "^10.0.0",
     "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.9.6",
     "rollup": "^4.34.8",
     "serve": "^14.2.6",
     "uglify-js": "^3.19.3"
