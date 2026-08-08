@@ -26,10 +26,10 @@ async function dragByOffset(
 	const box = await element.boundingBox();
 	const startX = box.x + offsetX;
 	const startY = box.y + offsetY;
-	
-page.debugLog(`Item Height: ${dragRect.height}px | OffsetY: ${offsetY}px`);
-  page.debugLog(`Start Y: ${startY}px -> End Y: ${endY}px`);
-	
+
+	page.debugLog(`Item Height: ${dragRect.height}px | OffsetY: ${offsetY}px`);
+	page.debugLog(`Start Y: ${startY}px -> End Y: ${endY}px`);
+
 	await page.mouse.move(startX, startY);
 	await page.mouse.down();
 	await page.mouse.move(startX + deltaX, startY + deltaY, { steps: 5 });
