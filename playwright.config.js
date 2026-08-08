@@ -18,7 +18,7 @@ export default defineConfig({
     headless: true,
 
     /* Base URL for the local testing server */
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:8080/tests',
 
     /* Collect trace when retrying the failed test for easier debugging */
     trace: 'on-first-retry',
@@ -31,7 +31,7 @@ export default defineConfig({
     command: 'npx serve . -p 8080',
     port: 8080,
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 10 * 1000,
   },
 
   /* Configure projects for major browsers */
