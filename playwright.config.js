@@ -48,13 +48,5 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-  ],
-
-  /* Automatically spin up the local dev server before starting the tests */
-  webServer: {
-    command: 'npx http-server . -p 8080 -c-1',
-    url: 'http://localhost:8080',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  ]
 });
