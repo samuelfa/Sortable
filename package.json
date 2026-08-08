@@ -9,12 +9,12 @@
 		"@playwright/test": "^1.48.0",
 		"http-server": "^14.1.1",
 		"rollup": "^1.11.3",
-		"rollup-plugin-babel": "^4.3.2",
-		"rollup-plugin-json": "^4.0.0",
-		"rollup-plugin-node-resolve": "^5.0.0",
+		"@rollup/plugin-babel": "^5.3.0",
+		"@rollup/plugin-json": "^4.1.0",
+		"@rollup/plugin-node-resolve": "^13.0.6",
 		"uglify-js": "^3.5.12"
 	},
-	"description": "JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery required. Supports Meteor, AngularJS, React, Polymer, Vue, Knockout and any CSS library, e.g. Bootstrap.",
+	"description": "JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery required. Supports Meteor, AngularJS, React, Polymer, Vue, Knockout and any [...]",
 	"main": "./Sortable.min.js",
 	"module": "modular/sortable.esm.js",
 	"scripts": {
