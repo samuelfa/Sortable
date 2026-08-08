@@ -16,6 +16,7 @@ export const test = base.extend({
 		page.on('response', (response) => {
 			const isDocument = response.request().resourceType() === 'document';
 			if (isDocument) {
+				const status = response.status();
 				if (status >= 300) {
                    const redirectTo = response.headers()['location'] || 'Desconocido';
                    console.log(`\n🔴 HTTP ${status} en la petición:`);
