@@ -2,47 +2,41 @@ name: CI
 
 on:
   push:
-    branches: [ master, main ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ master, main ]
+    branches:
+      - '**'
+
+# Cancel in-progress runs when a new commit is pushed to the same branch or PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  build:
+    name: Node.js CI (Node 24)
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20.x
-        cache: 'npm'
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm' # Native npm dependency caching
 
-    - name: Build
-      run: npm run build
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
+      - name: Build UMD
+        run: npm run build:umd
 
-    - name: Run tests
-      run: npm test
+      - name: Compatibility Test (non-PR runs only)
+        if: github.event_name != 'pull_request'
+        run: npm run test:compat
 
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 7
-
-    - name: Upload test results (XML)
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: test-results/
-        retention-days: 7
+      - name: Run test suite
+        run: npm run test
