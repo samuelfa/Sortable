@@ -110,8 +110,7 @@ test.describe('Simple Sorting', () => {
 			);
 		}, swapThreshold);
 
-		//const thresholdOffset = (itemHeight / 2) * (1 - swapThreshold); // +10.8px for 54px items
-		const thresholdOffset = itemHeight * (swapThreshold - 0.5); // Exactly +5.4px
+		const thresholdOffset = -((itemHeight / 2) * (1 - swapThreshold)); // -10.8px
 
 		if (page.debugLog) {
 			page.debugLog(`=== SWAP THRESHOLD TEST SETUP ===`);
