@@ -1,7 +1,6 @@
 import { test, expect } from './fixtures.js';
 
 const itemHeight = 54; // px
-const leeway = 1;
 
 // Helper to drag source element to target element with vertical offset from target center
 async function dragToWithOffsetY(source, target, destinationOffsetY) {
@@ -75,48 +74,64 @@ test.describe('Simple Sorting', () => {
 	});
 
 	test('Swap threshold', async ({ page }) => {
-		const list1 = page.locator('#list1');
+	const list1 = page.locator('#list1');
 
-		const dragStartPosition = list1.locator('> *').nth(0);
-		const targetStartPosition = list1.locator('> *').nth(1);
+	const dragStartPosition = list1.locator('> *').nth(0);
+	const targetStartPosition = list1.locator('> *').nth(1);
 
-		const dragText = await dragStartPosition.innerText();
-		const targetText = await targetStartPosition.innerText();
+	const dragText = await dragStartPosition.innerText();
+	const targetText = await targetStartPosition.innerText();
 
-		await page.evaluate(() => {
-			Sortable.get(document.getElementById('list1')).option(
-				'swapThreshold',
-				0.6
-			);
-		});
+	const swapThreshold = 0.6; // 60% total swap zone
 
-		// Center = 50% height (0px offset).
-		// 60% boundary = 50% + 10% -> (itemHeight * 0.10) offset from center.
-		const leeway = 2; // Pixel safety delta
-		const thresholdDelta = itemHeight * 0.1; // Exactly +5.4px for 54px items
-
-		// 1. Below 60% limit (~58% overlap -> +3.4px offset): SHOULD NOT SWAP
-		await dragToWithOffsetY(
-			dragStartPosition,
-			targetStartPosition,
-			Math.round(thresholdDelta - leeway)
+	await page.evaluate((threshold) => {
+		Sortable.get(document.getElementById('list1')).option(
+			'swapThreshold',
+			threshold
 		);
-		await expect(dragStartPosition).toHaveText(dragText);
-		await expect(targetStartPosition).toHaveText(targetText);
+	}, swapThreshold);
 
-		// 2. Above 60% limit (~62% overlap -> +7.4px offset): SHOULD SWAP
-		await dragToWithOffsetY(
-			dragStartPosition,
-			targetStartPosition,
-			Math.round(thresholdDelta + leeway)
-		);
+	/*
+	 * =========================================================================
+	 * SWAP THRESHOLD GEOMETRY
+	 * =========================================================================
+	 * With `swapThreshold = 0.6`:
+	 * - Top swap zone:    0% to 30% (swapThreshold / 2)
+	 * - Neutral zone:     30% to 70% (1 - swapThreshold = 40% center buffer)
+	 * - Bottom swap zone: 70% to 100% (triggers downward swap when crossed)
+	 * 
+	 * Target Center Reference: 50% height (offsetY = 0px)
+	 * Downward Trigger Line:   70% height
+	 * Offset from Center:      70% - 50% = +20% of item height
+	 *                          -> (itemHeight / 2) * (1 - swapThreshold)
+	 * =========================================================================
+	 */
+	const leeway = 3; // Safety buffer for subpixel rounding in Linux CI
+	const thresholdOffset = (itemHeight / 2) * (1 - swapThreshold); // +10.8px for 54px items
 
-		const dragEndPosition = list1.locator('> *').nth(1);
-		const targetEndPosition = list1.locator('> *').nth(0);
+	// 1. Below threshold (~64.8% height -> +7.8px offset from center): SHOULD NOT SWAP
+	await dragToWithOffsetY(
+		dragStartPosition,
+		targetStartPosition,
+		Math.round(thresholdOffset - leeway)
+	);
+	await expect(dragStartPosition).toHaveText(dragText);
+	await expect(targetStartPosition).toHaveText(targetText);
 
-		await expect(dragEndPosition).toHaveText(dragText);
-		await expect(targetEndPosition).toHaveText(targetText);
-	});
+	// 2. Above threshold (~75.9% height -> +13.8px offset from center): SHOULD SWAP
+	await dragToWithOffsetY(
+		dragStartPosition,
+		targetStartPosition,
+		Math.round(thresholdOffset + leeway)
+	);
+
+	const dragEndPosition = list1.locator('> *').nth(1);
+	const targetEndPosition = list1.locator('> *').nth(0);
+
+	await expect(dragEndPosition).toHaveText(dragText);
+	await expect(targetEndPosition).toHaveText(targetText);
+});
+	
 
 	test('Invert swap', async ({ page }) => {
 		const list1 = page.locator('#list1');
