@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures.js';
 
+const leeway = 3; // Safety buffer for subpixel rounding in Linux CI
 const itemHeight = 54; // px
 
 // Helper to drag source element to target element with vertical offset from target center
@@ -106,7 +107,7 @@ test.describe('Simple Sorting', () => {
 		 *                          -> (itemHeight / 2) * (1 - swapThreshold)
 		 * =========================================================================
 		 */
-		const leeway = 3; // Safety buffer for subpixel rounding in Linux CI
+		
 		const thresholdOffset = (itemHeight / 2) * (1 - swapThreshold); // +10.8px for 54px items
 
 		// 1. Below threshold (~64.8% height -> +7.8px offset from center): SHOULD NOT SWAP
