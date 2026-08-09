@@ -80,49 +80,33 @@ test.describe('Simple Sorting', () => {
 		const dragStartPosition = list1.locator('> *').nth(0);
 		const targetStartPosition = list1.locator('> *').nth(1);
 
-		const dragText = await dragStartPosition.innerText();
-		const targetText = await targetStartPosition.innerText();
-
 		await page.evaluate(() => {
-			Sortable.get(document.getElementById('list1')).option(
-				'swapThreshold',
-				0.6
-			);
-		});
-
-		const sourceBox = await dragStartPosition.boundingBox();
-		const targetBox = await targetStartPosition.boundingBox();
-		const calculatedOffset = Math.round((itemHeight / 2) * 0.4 - leeway);
-
-		console.log('=== MATH DIAGNOSTICS ===');
-		console.log(`itemHeight (constant): ${itemHeight}`);
-		console.log(`leeway (constant): ${leeway}`);
-		console.log(`Calculated Offset Y: ${calculatedOffset}px`);
-		console.log(`Source Box Real Height: ${sourceBox?.height}px`);
-		console.log(`Target Box Real Height: ${targetBox?.height}px`);
-		console.log(
-			`Target Y Center: ${targetBox ? targetBox.y + targetBox.height / 2 : 0}px`
+		Sortable.get(document.getElementById('list1')).option(
+			'swapThreshold',
+			0.6
 		);
-		console.log(
-			`Final Mouse Y Target: ${targetBox ? targetBox.y + targetBox.height / 2 + calculatedOffset : 0}px`
-		);
-		console.log('========================');
+	});
+		
+	// Center = 50% height (0px offset).
+	// 60% boundary = 50% + 10% -> (itemHeight * 0.10) offset from center.
+	const leeway = 2; // Pixel safety delta
+	const thresholdDelta = itemHeight * 0.10; // Exactly +5.4px for 54px items
 
-		// Below swap threshold - should NOT swap
-		await dragToWithOffsetY(
-			dragStartPosition,
-			targetStartPosition,
-			calculatedOffset
-		);
-		await expect(dragStartPosition).toHaveText(dragText);
-		await expect(targetStartPosition).toHaveText(targetText);
+	// 1. Below 60% limit (~58% overlap -> +3.4px offset): SHOULD NOT SWAP
+	await dragToWithOffsetY(
+		dragStartPosition,
+		targetStartPosition,
+		Math.round(thresholdDelta - leeway)
+	);
+	await expect(dragStartPosition).toHaveText(dragText);
+	await expect(targetStartPosition).toHaveText(targetText);
 
-		// Above swap threshold - SHOULD swap
-		await dragToWithOffsetY(
-			dragStartPosition,
-			targetStartPosition,
-			Math.round((itemHeight / 2) * 0.4 + leeway)
-		);
+	// 2. Above 60% limit (~62% overlap -> +7.4px offset): SHOULD SWAP
+	await dragToWithOffsetY(
+		dragStartPosition,
+		targetStartPosition,
+		Math.round(thresholdDelta + leeway)
+	);
 
 		const dragEndPosition = list1.locator('> *').nth(1);
 		const targetEndPosition = list1.locator('> *').nth(0);
