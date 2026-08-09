@@ -92,7 +92,7 @@ test.describe('Simple Sorting', () => {
 		await expect(targetEndPosition).toHaveText(targetText);
 	});
 
-	test('Swap threshold', async ({ page }) => {
+	test('Swap threshold - Below limit (should NOT swap)', async ({ page }) => {
 		const list1 = page.locator('#list1');
 
 		const dragStartPosition = list1.locator('> *').nth(0);
@@ -101,7 +101,7 @@ test.describe('Simple Sorting', () => {
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
-		const swapThreshold = 0.6; // 60% total swap zone
+		const swapThreshold = 0.6;
 
 		await page.evaluate((threshold) => {
 			Sortable.get(document.getElementById('list1')).option(
@@ -110,53 +110,78 @@ test.describe('Simple Sorting', () => {
 			);
 		}, swapThreshold);
 
-		const thresholdOffset = -((itemHeight / 2) * (1 - swapThreshold)); // -10.8px
+		/*
+		 * TEST GEOMETRY (DOWNWARD DRAG):
+		 * - Element height: 54px (Center = 27px from top).
+		 * - swapThreshold (0.6): Centered 60% swap zone (30% on each side of the center).
+		 * - Inactive top margin: Initial 20% = 10.8px from top.
+		 * - Offset from center (27px - 10.8px): -16.2px
+		 *
+		 * Target offset (with leeway = 2px):
+		 * -16.2px - 2px = -18.2px (rounded to -18px).
+		 * Actual mouse position: 27px - 18px = 9px from top (16.7% of total height).
+		 * Being below the 20% threshold, it SHOULD NOT SWAP.
+		 */
+		const thresholdOffset = -((itemHeight / 2) * swapThreshold); // -16.2px
+		const belowOffset = Math.round(thresholdOffset - leeway);     // -18px
 
 		if (page.debugLog) {
-			page.debugLog(`=== SWAP THRESHOLD TEST SETUP ===`);
-			page.debugLog(`itemHeight constant: ${itemHeight}px`);
-			page.debugLog(`leeway: ${leeway}px`);
-			page.debugLog(`swapThreshold: ${swapThreshold}`);
-			page.debugLog(`Calculated thresholdOffset: ${thresholdOffset}px`);
-			page.debugLog(`Calculated belowOffset: ${thresholdOffset - leeway}px`);
-			page.debugLog(`Calculated aboveOffset: ${thresholdOffset + leeway}px`);
+			page.debugLog(`[Below Test] Executing drag with offsetY: ${belowOffset}px`);
 		}
 
-		/*
-		 * =========================================================================
-		 * SWAP THRESHOLD GEOMETRY
-		 * =========================================================================
-		 * With `swapThreshold = 0.6`:
-		 * - Top swap zone:    0% to 30% (swapThreshold / 2)
-		 * - Neutral zone:     30% to 70% (1 - swapThreshold = 40% center buffer)
-		 * - Bottom swap zone: 70% to 100% (triggers downward swap when crossed)
-		 *
-		 * Target Center Reference: 50% height (offsetY = 0px)
-		 * Downward Trigger Line:   70% height
-		 * Offset from Center:      70% - 50% = +20% of item height
-		 *                          -> (itemHeight / 2) * (1 - swapThreshold)
-		 * =========================================================================
-		 */
-
-		// 1. Below threshold (~64.8% height -> +7.8px offset from center): SHOULD NOT SWAP
 		await dragToWithOffsetY(
 			dragStartPosition,
 			targetStartPosition,
-			Math.round(thresholdOffset - leeway)
+			belowOffset
 		);
+
+		// Assert elements have NOT swapped
 		await expect(dragStartPosition).toHaveText(dragText);
 		await expect(targetStartPosition).toHaveText(targetText);
+	});
 
-		// 2. Above threshold (~75.9% height -> +13.8px offset from center): SHOULD SWAP
+	test('Swap threshold - Above limit (SHOULD swap)', async ({ page }) => {
+		const list1 = page.locator('#list1');
+
+		const dragStartPosition = list1.locator('> *').nth(0);
+		const targetStartPosition = list1.locator('> *').nth(1);
+
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
+
+		const swapThreshold = 0.6;
+
+		await page.evaluate((threshold) => {
+			Sortable.get(document.getElementById('list1')).option(
+				'swapThreshold',
+				threshold
+			);
+		}, swapThreshold);
+
+		/*
+		 * TEST GEOMETRY (DOWNWARD DRAG):
+		 * Target offset (with leeway = 2px):
+		 * -16.2px + 2px = -14.2px (rounded to -14px).
+		 * Actual mouse position: 27px - 14px = 13px from top (24.1% of total height).
+		 * Passing the 20% threshold (10.8px), it SHOULD SWAP.
+		 */
+		const thresholdOffset = -((itemHeight / 2) * swapThreshold); // -16.2px
+		const aboveOffset = Math.round(thresholdOffset + leeway);     // -14px
+
+		if (page.debugLog) {
+			page.debugLog(`[Above Test] Executing drag with offsetY: ${aboveOffset}px`);
+		}
+
 		await dragToWithOffsetY(
 			dragStartPosition,
 			targetStartPosition,
-			Math.round(thresholdOffset + leeway)
+			aboveOffset
 		);
 
 		const dragEndPosition = list1.locator('> *').nth(1);
 		const targetEndPosition = list1.locator('> *').nth(0);
 
+		// Assert elements HAVE swapped
 		await expect(dragEndPosition).toHaveText(dragText);
 		await expect(targetEndPosition).toHaveText(targetText);
 	});
