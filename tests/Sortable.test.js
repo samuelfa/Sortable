@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures.js';
 
-const leeway = 3; // Safety buffer for subpixel rounding in Linux CI
+const leeway = 2; // Safety buffer for subpixel rounding in Linux CI
 const itemHeight = 54; // px
 
 // Helper to drag source element to target element with vertical offset from target center
