@@ -5,7 +5,21 @@ const itemHeight = 54; // px
 
 // Helper to drag source element to target element with vertical offset from target center
 async function dragToWithOffsetY(source, target, destinationOffsetY) {
+	const page = source.page();
+	const sourceBox = await source.boundingBox();
 	const targetBox = await target.boundingBox();
+
+	if (page && page.debugLog) {
+		const targetCenterY = targetBox ? targetBox.y + targetBox.height / 2 : 0;
+		const finalMouseY = targetCenterY + destinationOffsetY;
+
+		page.debugLog(`--- dragToWithOffsetY Execution ---`);
+		page.debugLog(`  • Offset Y passed: ${destinationOffsetY}px`);
+		page.debugLog(`  • Source Box: height=${sourceBox?.height}px, y=${sourceBox?.y}px`);
+		page.debugLog(`  • Target Box: height=${targetBox?.height}px, top=${targetBox?.y}px, center Y=${targetCenterY}px`);
+		page.debugLog(`  • Final Mouse Target Y: ${finalMouseY}px`);
+	}
+
 	await source.dragTo(target, {
 		targetPosition: {
 			x: targetBox.width / 2,
@@ -84,7 +98,7 @@ test.describe('Simple Sorting', () => {
 		const targetText = await targetStartPosition.innerText();
 
 		const swapThreshold = 0.6; // 60% total swap zone
-
+		
 		await page.evaluate((threshold) => {
 			Sortable.get(document.getElementById('list1')).option(
 				'swapThreshold',
@@ -92,6 +106,17 @@ test.describe('Simple Sorting', () => {
 			);
 		}, swapThreshold);
 
+		
+if (page.debugLog) {
+			page.debugLog(`=== SWAP THRESHOLD TEST SETUP ===`);
+			page.debugLog(`itemHeight constant: ${itemHeight}px`);
+			page.debugLog(`leeway: ${leeway}px`);
+			page.debugLog(`swapThreshold: ${swapThreshold}`);
+			page.debugLog(`Calculated thresholdOffset: ${thresholdOffset}px`);
+			page.debugLog(`Calculated belowOffset: ${thresholdOffset - leeway}px`);
+			page.debugLog(`Calculated aboveOffset: ${thresholdOffset + leeway}px`);
+		}
+		
 		/*
 		 * =========================================================================
 		 * SWAP THRESHOLD GEOMETRY
