@@ -123,10 +123,12 @@ test.describe('Simple Sorting', () => {
 		 * Being below the 20% threshold, it SHOULD NOT SWAP.
 		 */
 		const thresholdOffset = -((itemHeight / 2) * swapThreshold); // -16.2px
-		const belowOffset = Math.round(thresholdOffset - leeway);     // -18px
+		const belowOffset = Math.round(thresholdOffset - leeway); // -18px
 
 		if (page.debugLog) {
-			page.debugLog(`[Below Test] Executing drag with offsetY: ${belowOffset}px`);
+			page.debugLog(
+				`[Below Test] Executing drag with offsetY: ${belowOffset}px`
+			);
 		}
 
 		await dragToWithOffsetY(
@@ -166,10 +168,12 @@ test.describe('Simple Sorting', () => {
 		 * Passing the 20% threshold (10.8px), it SHOULD SWAP.
 		 */
 		const thresholdOffset = -((itemHeight / 2) * swapThreshold); // -16.2px
-		const aboveOffset = Math.round(thresholdOffset + leeway);     // -14px
+		const aboveOffset = Math.round(thresholdOffset + leeway); // -14px
 
 		if (page.debugLog) {
-			page.debugLog(`[Above Test] Executing drag with offsetY: ${aboveOffset}px`);
+			page.debugLog(
+				`[Above Test] Executing drag with offsetY: ${aboveOffset}px`
+			);
 		}
 
 		await dragToWithOffsetY(
