@@ -110,6 +110,8 @@ test.describe('Simple Sorting', () => {
 			);
 		}, swapThreshold);
 
+		const thresholdOffset = (itemHeight / 2) * (1 - swapThreshold); // +10.8px for 54px items
+
 		if (page.debugLog) {
 			page.debugLog(`=== SWAP THRESHOLD TEST SETUP ===`);
 			page.debugLog(`itemHeight constant: ${itemHeight}px`);
@@ -135,8 +137,6 @@ test.describe('Simple Sorting', () => {
 		 *                          -> (itemHeight / 2) * (1 - swapThreshold)
 		 * =========================================================================
 		 */
-
-		const thresholdOffset = (itemHeight / 2) * (1 - swapThreshold); // +10.8px for 54px items
 
 		// 1. Below threshold (~64.8% height -> +7.8px offset from center): SHOULD NOT SWAP
 		await dragToWithOffsetY(
