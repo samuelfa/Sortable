@@ -80,6 +80,9 @@ test.describe('Simple Sorting', () => {
 		const dragStartPosition = list1.locator('> *').nth(0);
 		const targetStartPosition = list1.locator('> *').nth(1);
 
+		const dragText = await dragStartPosition.innerText();
+	    const targetText = await targetStartPosition.innerText();
+		
 		await page.evaluate(() => {
 			Sortable.get(document.getElementById('list1')).option(
 				'swapThreshold',
