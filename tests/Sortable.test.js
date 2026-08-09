@@ -15,8 +15,12 @@ async function dragToWithOffsetY(source, target, destinationOffsetY) {
 
 		page.debugLog(`--- dragToWithOffsetY Execution ---`);
 		page.debugLog(`  • Offset Y passed: ${destinationOffsetY}px`);
-		page.debugLog(`  • Source Box: height=${sourceBox?.height}px, y=${sourceBox?.y}px`);
-		page.debugLog(`  • Target Box: height=${targetBox?.height}px, top=${targetBox?.y}px, center Y=${targetCenterY}px`);
+		page.debugLog(
+			`  • Source Box: height=${sourceBox?.height}px, y=${sourceBox?.y}px`
+		);
+		page.debugLog(
+			`  • Target Box: height=${targetBox?.height}px, top=${targetBox?.y}px, center Y=${targetCenterY}px`
+		);
 		page.debugLog(`  • Final Mouse Target Y: ${finalMouseY}px`);
 	}
 
@@ -98,7 +102,7 @@ test.describe('Simple Sorting', () => {
 		const targetText = await targetStartPosition.innerText();
 
 		const swapThreshold = 0.6; // 60% total swap zone
-		
+
 		await page.evaluate((threshold) => {
 			Sortable.get(document.getElementById('list1')).option(
 				'swapThreshold',
@@ -106,8 +110,7 @@ test.describe('Simple Sorting', () => {
 			);
 		}, swapThreshold);
 
-		
-if (page.debugLog) {
+		if (page.debugLog) {
 			page.debugLog(`=== SWAP THRESHOLD TEST SETUP ===`);
 			page.debugLog(`itemHeight constant: ${itemHeight}px`);
 			page.debugLog(`leeway: ${leeway}px`);
@@ -116,7 +119,7 @@ if (page.debugLog) {
 			page.debugLog(`Calculated belowOffset: ${thresholdOffset - leeway}px`);
 			page.debugLog(`Calculated aboveOffset: ${thresholdOffset + leeway}px`);
 		}
-		
+
 		/*
 		 * =========================================================================
 		 * SWAP THRESHOLD GEOMETRY
