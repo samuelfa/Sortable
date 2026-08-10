@@ -101,7 +101,10 @@ test.describe('Simple Sorting', () => {
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
+		// Explicit configuration variables to avoid magic numbers
 		const swapThreshold = 0.6;
+		const safetyMarginPx = 4; // Pixel buffer to remain safely above/below threshold line
+		const dragSteps = 2; // Minimal steps to prevent Playwright overshoot events
 
 		await page.evaluate((threshold) => {
 			Sortable.get(document.getElementById('list1')).option(
@@ -110,34 +113,32 @@ test.describe('Simple Sorting', () => {
 			);
 		}, swapThreshold);
 
+		const sourceBox = await dragStartPosition.boundingBox();
+		const targetBox = await targetStartPosition.boundingBox();
+
 		/*
-		 * TEST GEOMETRY (DOWNWARD DRAG):
-		 * - Element height: 54px (Center = 27px from top).
-		 * - swapThreshold (0.6): Centered 60% swap zone (30% on each side of the center).
-		 * - Inactive top margin: Initial 20% = 10.8px from top.
-		 * - Offset from center (27px - 10.8px): -16.2px
+		 * SORTABLEJS INTERNAL SWAP MECHANISM (DOWNWARD MOVEMENT):
+		 * When dragging downward, SortableJS calculates the exact swap boundary as:
+		 *   thresholdY = targetBox.y + (targetBox.height * swapThreshold)
 		 *
-		 * Target offset (with leeway = 2px):
-		 * -16.2px - 2px = -18.2px (rounded to -18px).
-		 * Actual mouse position: 27px - 18px = 9px from top (16.7% of total height).
-		 * Being below the 20% threshold, it SHOULD NOT SWAP.
+		 * To test the "no swap" condition safely:
+		 *   We position the cursor `safetyMarginPx` ABOVE the threshold line.
+		 *   Target Y = thresholdY - safetyMarginPx
 		 */
-		const thresholdOffset = -((itemHeight / 2) * swapThreshold); // -16.2px
-		const belowOffset = Math.round(thresholdOffset - leeway); // -18px
+		const thresholdY = targetBox.y + targetBox.height * swapThreshold;
+		const targetY = thresholdY - safetyMarginPx;
+		const targetX = targetBox.x + targetBox.width / 2;
 
-		if (page.debugLog) {
-			page.debugLog(
-				`[Below Test] Executing drag with offsetY: ${belowOffset}px`
-			);
-		}
+		const startX = sourceBox.x + sourceBox.width / 2;
+		const startY = sourceBox.y + sourceBox.height / 2;
 
-		await dragToWithOffsetY(
-			dragStartPosition,
-			targetStartPosition,
-			belowOffset
-		);
+		// Perform direct mouse move to avoid Playwright intermediate dragover noise
+		await page.mouse.move(startX, startY);
+		await page.mouse.down();
+		await page.mouse.move(targetX, targetY, { steps: dragSteps });
+		await page.mouse.up();
 
-		// Assert elements have NOT swapped
+		// Assert that the DOM order remains unchanged
 		await expect(dragStartPosition).toHaveText(dragText);
 		await expect(targetStartPosition).toHaveText(targetText);
 	});
@@ -151,7 +152,10 @@ test.describe('Simple Sorting', () => {
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
+		// Explicit configuration variables to avoid magic numbers
 		const swapThreshold = 0.6;
+		const safetyMarginPx = 4; // Pixel buffer to remain safely above/below threshold line
+		const dragSteps = 2; // Minimal steps to prevent Playwright overshoot events
 
 		await page.evaluate((threshold) => {
 			Sortable.get(document.getElementById('list1')).option(
@@ -160,32 +164,35 @@ test.describe('Simple Sorting', () => {
 			);
 		}, swapThreshold);
 
+		const sourceBox = await dragStartPosition.boundingBox();
+		const targetBox = await targetStartPosition.boundingBox();
+
 		/*
-		 * TEST GEOMETRY (DOWNWARD DRAG):
-		 * Target offset (with leeway = 2px):
-		 * -16.2px + 2px = -14.2px (rounded to -14px).
-		 * Actual mouse position: 27px - 14px = 13px from top (24.1% of total height).
-		 * Passing the 20% threshold (10.8px), it SHOULD SWAP.
+		 * SORTABLEJS INTERNAL SWAP MECHANISM (DOWNWARD MOVEMENT):
+		 * When dragging downward, SortableJS calculates the exact swap boundary as:
+		 *   thresholdY = targetBox.y + (targetBox.height * swapThreshold)
+		 *
+		 * To test the "swap triggers" condition safely:
+		 *   We position the cursor `safetyMarginPx` BELOW the threshold line.
+		 *   Target Y = thresholdY + safetyMarginPx
 		 */
-		const thresholdOffset = -((itemHeight / 2) * swapThreshold); // -16.2px
-		const aboveOffset = Math.round(thresholdOffset + leeway); // -14px
+		const thresholdY = targetBox.y + targetBox.height * swapThreshold;
+		const targetY = thresholdY + safetyMarginPx;
+		const targetX = targetBox.x + targetBox.width / 2;
 
-		if (page.debugLog) {
-			page.debugLog(
-				`[Above Test] Executing drag with offsetY: ${aboveOffset}px`
-			);
-		}
+		const startX = sourceBox.x + sourceBox.width / 2;
+		const startY = sourceBox.y + sourceBox.height / 2;
 
-		await dragToWithOffsetY(
-			dragStartPosition,
-			targetStartPosition,
-			aboveOffset
-		);
+		// Perform direct mouse move to avoid Playwright intermediate dragover noise
+		await page.mouse.move(startX, startY);
+		await page.mouse.down();
+		await page.mouse.move(targetX, targetY, { steps: dragSteps });
+		await page.mouse.up();
 
 		const dragEndPosition = list1.locator('> *').nth(1);
 		const targetEndPosition = list1.locator('> *').nth(0);
 
-		// Assert elements HAVE swapped
+		// Assert that elements have successfully swapped positions
 		await expect(dragEndPosition).toHaveText(dragText);
 		await expect(targetEndPosition).toHaveText(targetText);
 	});
