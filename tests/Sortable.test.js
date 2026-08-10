@@ -8,7 +8,14 @@ const itemHeight = 54; // px
  * Drags source to target relative to the Wiki center-offset formula
  * and logs telemetry for error diagnostics.
  */
-async function dragToThresholdWithDebug(page, source, target, swapThreshold, safetyMarginPx, isAboveThreshold) {
+async function dragToThresholdWithDebug(
+	page,
+	source,
+	target,
+	swapThreshold,
+	safetyMarginPx,
+	isAboveThreshold
+) {
 	const sourceBox = await source.boundingBox();
 	const targetBox = await target.boundingBox();
 
@@ -18,26 +25,39 @@ async function dragToThresholdWithDebug(page, source, target, swapThreshold, saf
 	const boundaryY = centerPointY + boundaryOffsetFromCenter;
 
 	// Target position calculation
-	const targetY = isAboveThreshold ? boundaryY + safetyMarginPx : boundaryY - safetyMarginPx;
+	const targetY = isAboveThreshold
+		? boundaryY + safetyMarginPx
+		: boundaryY - safetyMarginPx;
 	const targetX = targetBox.x + targetBox.width / 2;
 
 	const startX = sourceBox.x + sourceBox.width / 2;
 	const startY = sourceBox.y + sourceBox.height / 2;
 
-	const percentageOfTargetHeight = ((targetY - targetBox.y) / targetBox.height) * 100;
+	const percentageOfTargetHeight =
+		((targetY - targetBox.y) / targetBox.height) * 100;
 
 	// Telemetry logging (only outputted if test fails)
 	if (page.logDebug) {
 		page.logDebug(`--- DRAG ATTEMPT TELEMETRY ---`);
-		page.logDebug(`Target expected behavior: ${isAboveThreshold ? 'SHOULD SWAP' : 'SHOULD NOT SWAP'}`);
+		page.logDebug(
+			`Target expected behavior: ${isAboveThreshold ? 'SHOULD SWAP' : 'SHOULD NOT SWAP'}`
+		);
 		page.logDebug(`swapThreshold option: ${swapThreshold}`);
 		page.logDebug(`safetyMarginPx: ${safetyMarginPx}px`);
-		page.logDebug(`Source Box: top=${sourceBox.y}px, height=${sourceBox.height}px`);
-		page.logDebug(`Target Box: top=${targetBox.y}px, height=${targetBox.height}px`);
+		page.logDebug(
+			`Source Box: top=${sourceBox.y}px, height=${sourceBox.height}px`
+		);
+		page.logDebug(
+			`Target Box: top=${targetBox.y}px, height=${targetBox.height}px`
+		);
 		page.logDebug(`Target Center Y (50%): ${centerPointY}px`);
-		page.logDebug(`Boundary Offset from Center: +${boundaryOffsetFromCenter}px`);
+		page.logDebug(
+			`Boundary Offset from Center: +${boundaryOffsetFromCenter}px`
+		);
 		page.logDebug(`Calculated Boundary Line Y (70%): ${boundaryY}px`);
-		page.logDebug(`Actual Mouse Target Y: ${targetY}px (${percentageOfTargetHeight.toFixed(2)}% of target height)`);
+		page.logDebug(
+			`Actual Mouse Target Y: ${targetY}px (${percentageOfTargetHeight.toFixed(2)}% of target height)`
+		);
 	}
 
 	// Perform precise drag
@@ -108,77 +128,75 @@ test.describe('Simple Sorting', () => {
 	});
 
 	test('Swap threshold - Below limit (should NOT swap)', async ({ page }) => {
-	const list1 = page.locator('#list1');
+		const list1 = page.locator('#list1');
 
-	const dragStartPosition = list1.locator('> *').nth(0);
-	const targetStartPosition = list1.locator('> *').nth(1);
+		const dragStartPosition = list1.locator('> *').nth(0);
+		const targetStartPosition = list1.locator('> *').nth(1);
 
-	const dragText = await dragStartPosition.innerText();
-	const targetText = await targetStartPosition.innerText();
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
 
-	const swapThreshold = 0.6;
-	const safetyMarginPx = 4;
+		const swapThreshold = 0.6;
+		const safetyMarginPx = 4;
 
-	await page.evaluate((threshold) => {
-		Sortable.get(document.getElementById('list1')).option(
-			'swapThreshold',
-			threshold
+		await page.evaluate((threshold) => {
+			Sortable.get(document.getElementById('list1')).option(
+				'swapThreshold',
+				threshold
+			);
+		}, swapThreshold);
+
+		// Perform drag below boundary (isAboveThreshold = false)
+		await dragToThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			swapThreshold,
+			safetyMarginPx,
+			false
 		);
-	}, swapThreshold);
 
-	// Perform drag below boundary (isAboveThreshold = false)
-	await dragToThresholdWithDebug(
-		page,
-		dragStartPosition,
-		targetStartPosition,
-		swapThreshold,
-		safetyMarginPx,
-		false
-	);
+		// Assert elements have NOT swapped
+		await expect(dragStartPosition).toHaveText(dragText);
+		await expect(targetStartPosition).toHaveText(targetText);
+	});
 
-	// Assert elements have NOT swapped
-	await expect(dragStartPosition).toHaveText(dragText);
-	await expect(targetStartPosition).toHaveText(targetText);
-});
+	test('Swap threshold - Above limit (SHOULD swap)', async ({ page }) => {
+		const list1 = page.locator('#list1');
 
-test('Swap threshold - Above limit (SHOULD swap)', async ({ page }) => {
-	const list1 = page.locator('#list1');
+		const dragStartPosition = list1.locator('> *').nth(0);
+		const targetStartPosition = list1.locator('> *').nth(1);
 
-	const dragStartPosition = list1.locator('> *').nth(0);
-	const targetStartPosition = list1.locator('> *').nth(1);
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
 
-	const dragText = await dragStartPosition.innerText();
-	const targetText = await targetStartPosition.innerText();
+		const swapThreshold = 0.6;
+		const safetyMarginPx = 4;
 
-	const swapThreshold = 0.6;
-	const safetyMarginPx = 4;
+		await page.evaluate((threshold) => {
+			Sortable.get(document.getElementById('list1')).option(
+				'swapThreshold',
+				threshold
+			);
+		}, swapThreshold);
 
-	await page.evaluate((threshold) => {
-		Sortable.get(document.getElementById('list1')).option(
-			'swapThreshold',
-			threshold
+		// Perform drag above boundary (isAboveThreshold = true)
+		await dragToThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			swapThreshold,
+			safetyMarginPx,
+			true
 		);
-	}, swapThreshold);
 
-	// Perform drag above boundary (isAboveThreshold = true)
-	await dragToThresholdWithDebug(
-		page,
-		dragStartPosition,
-		targetStartPosition,
-		swapThreshold,
-		safetyMarginPx,
-		true
-	);
+		const dragEndPosition = list1.locator('> *').nth(1);
+		const targetEndPosition = list1.locator('> *').nth(0);
 
-	const dragEndPosition = list1.locator('> *').nth(1);
-	const targetEndPosition = list1.locator('> *').nth(0);
-
-	// Assert elements HAVE swapped
-	await expect(dragEndPosition).toHaveText(dragText);
-	await expect(targetEndPosition).toHaveText(targetText);
-});
-	
-	
+		// Assert elements HAVE swapped
+		await expect(dragEndPosition).toHaveText(dragText);
+		await expect(targetEndPosition).toHaveText(targetText);
+	});
 
 	test('Invert swap', async ({ page }) => {
 		const list1 = page.locator('#list1');
