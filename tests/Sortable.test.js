@@ -37,25 +37,25 @@ async function dragToThresholdWithDebug(
 		((targetY - targetBox.y) / targetBox.height) * 100;
 
 	// Telemetry logging (only outputted if test fails)
-	if (page.logDebug) {
-		page.logDebug(`--- DRAG ATTEMPT TELEMETRY ---`);
-		page.logDebug(
+	if (page.debugLog) {
+		page.debugLog(`--- DRAG ATTEMPT TELEMETRY ---`);
+		page.debugLog(
 			`Target expected behavior: ${isAboveThreshold ? 'SHOULD SWAP' : 'SHOULD NOT SWAP'}`
 		);
-		page.logDebug(`swapThreshold option: ${swapThreshold}`);
-		page.logDebug(`safetyMarginPx: ${safetyMarginPx}px`);
-		page.logDebug(
+		page.debugLog(`swapThreshold option: ${swapThreshold}`);
+		page.debugLog(`safetyMarginPx: ${safetyMarginPx}px`);
+		page.debugLog(
 			`Source Box: top=${sourceBox.y}px, height=${sourceBox.height}px`
 		);
-		page.logDebug(
+		page.debugLog(
 			`Target Box: top=${targetBox.y}px, height=${targetBox.height}px`
 		);
-		page.logDebug(`Target Center Y (50%): ${centerPointY}px`);
-		page.logDebug(
+		page.debugLog(`Target Center Y (50%): ${centerPointY}px`);
+		page.debugLog(
 			`Boundary Offset from Center: +${boundaryOffsetFromCenter}px`
 		);
-		page.logDebug(`Calculated Boundary Line Y (70%): ${boundaryY}px`);
-		page.logDebug(
+		page.debugLog(`Calculated Boundary Line Y (70%): ${boundaryY}px`);
+		page.debugLog(
 			`Actual Mouse Target Y: ${targetY}px (${percentageOfTargetHeight.toFixed(2)}% of target height)`
 		);
 	}
