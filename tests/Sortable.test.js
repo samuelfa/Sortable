@@ -3,67 +3,72 @@ import { test, expect } from './fixtures.js';
 const leeway = 2; // Safety buffer for subpixel rounding in Linux CI
 const itemHeight = 54; // px
 
-// Helper to drag source element to target element with vertical offset from target center
+
 /**
- * Drags source to target relative to the Wiki center-offset formula
- * and logs telemetry for error diagnostics.
+ * Auxiliary method to calculate exact 3-zone geometry, execute direct mouse drag,
+ * and record detailed math telemetry to page.debugLog for failure diagnostics.
+ *
+ * @param {import('@playwright/test').Page} page - Playwright page object
+ * @param {import('@playwright/test').Locator} source - Drag source element locator
+ * @param {import('@playwright/test').Locator} target - Drag target element locator
+ * @param {number} swapThreshold - SortableJS swapThreshold option (e.g., 0.6)
+ * @param {'top' | 'center' | 'bottom'} zone - Target zone to drop into
  */
-async function dragToThresholdWithDebug(
-	page,
-	source,
-	target,
-	swapThreshold,
-	safetyMarginPx,
-	isAboveThreshold
-) {
+async function dragToThresholdWithDebug(page, source, target, swapThreshold, zone) {
 	const sourceBox = await source.boundingBox();
 	const targetBox = await target.boundingBox();
 
-	// Wiki Formula Calculations
-	const centerPointY = targetBox.y + targetBox.height / 2;
-	const boundaryOffsetFromCenter = (targetBox.height / 2) * (1 - swapThreshold);
-	const boundaryY = centerPointY + boundaryOffsetFromCenter;
+	const dragSteps = 1; // Single step prevents path overshoot events in Playwright
 
-	// Target position calculation
-	const targetY = isAboveThreshold
-		? boundaryY + safetyMarginPx
-		: boundaryY - safetyMarginPx;
-	const targetX = targetBox.x + targetBox.width / 2;
+	// 1. Calculate 3-zone geometry from target center (50% mark)
+	const centerY = targetBox.y + targetBox.height / 2;
+	const halfSwapZoneHeight = (targetBox.height * swapThreshold) / 2;
+
+	const upperSwapBoundaryY = centerY - halfSwapZoneHeight;
+	const lowerSwapBoundaryY = centerY + halfSwapZoneHeight;
+	const targetBottomY = targetBox.y + targetBox.height;
+
+	// 2. Compute exact midpoint target Y for the selected zone
+	let targetY;
+	let expectedBehavior;
+
+	if (zone === 'top') {
+		// Midpoint of the top buffer zone (0% to 20% height)
+		targetY = targetBox.y + (upperSwapBoundaryY - targetBox.y) / 2;
+		expectedBehavior = 'SHOULD NOT SWAP';
+	} else if (zone === 'center') {
+		// Midpoint of the central active swap zone (20% to 80% height)
+		targetY = centerY;
+		expectedBehavior = 'SHOULD SWAP';
+	} else if (zone === 'bottom') {
+		// Midpoint of the bottom buffer zone (80% to 100% height)
+		targetY = lowerSwapBoundaryY + (targetBottomY - lowerSwapBoundaryY) / 2;
+		expectedBehavior = 'SHOULD NOT SWAP';
+	}
 
 	const startX = sourceBox.x + sourceBox.width / 2;
 	const startY = sourceBox.y + sourceBox.height / 2;
+	const targetX = targetBox.x + targetBox.width / 2;
 
-	const percentageOfTargetHeight =
-		((targetY - targetBox.y) / targetBox.height) * 100;
+	const targetYPercentage = ((targetY - targetBox.y) / targetBox.height) * 100;
 
-	// Telemetry logging (only outputted if test fails)
+	// 3. Log comprehensive telemetry to page.debugLog
 	if (page.debugLog) {
-		page.debugLog(`--- DRAG ATTEMPT TELEMETRY ---`);
-		page.debugLog(
-			`Target expected behavior: ${isAboveThreshold ? 'SHOULD SWAP' : 'SHOULD NOT SWAP'}`
-		);
+		page.debugLog(`=== SWAP THRESHOLD TELEMETRY (${zone.toUpperCase()} ZONE) ===`);
+		page.debugLog(`Expected Behavior: ${expectedBehavior}`);
 		page.debugLog(`swapThreshold option: ${swapThreshold}`);
-		page.debugLog(`safetyMarginPx: ${safetyMarginPx}px`);
-		page.debugLog(
-			`Source Box: top=${sourceBox.y}px, height=${sourceBox.height}px`
-		);
-		page.debugLog(
-			`Target Box: top=${targetBox.y}px, height=${targetBox.height}px`
-		);
-		page.debugLog(`Target Center Y (50%): ${centerPointY}px`);
-		page.debugLog(
-			`Boundary Offset from Center: +${boundaryOffsetFromCenter}px`
-		);
-		page.debugLog(`Calculated Boundary Line Y (70%): ${boundaryY}px`);
-		page.debugLog(
-			`Actual Mouse Target Y: ${targetY}px (${percentageOfTargetHeight.toFixed(2)}% of target height)`
-		);
+		page.debugLog(`Source Box: top=${sourceBox.y}px, height=${sourceBox.height}px`);
+		page.debugLog(`Target Box: top=${targetBox.y}px, height=${targetBox.height}px`);
+		page.debugLog(`Target Center Y (50%): ${centerY}px`);
+		page.debugLog(`Upper Swap Boundary Y (20%): ${upperSwapBoundaryY}px`);
+		page.debugLog(`Lower Swap Boundary Y (80%): ${lowerSwapBoundaryY}px`);
+		page.debugLog(`Actual Mouse Target Y: ${targetY}px (${targetYPercentage.toFixed(2)}% of target height)`);
 	}
 
-	// Perform precise drag
+	// 4. Perform direct mouse move to target coordinate
 	await page.mouse.move(startX, startY);
 	await page.mouse.down();
-	await page.mouse.move(targetX, targetY, { steps: 1 });
+	await page.mouse.move(targetX, targetY, { steps: dragSteps });
 	await page.mouse.up();
 }
 
@@ -127,76 +132,105 @@ test.describe('Simple Sorting', () => {
 		await expect(targetEndPosition).toHaveText(targetText);
 	});
 
-	test('Swap threshold - Below limit (should NOT swap)', async ({ page }) => {
-		const list1 = page.locator('#list1');
+test('Swap threshold - Top buffer zone (should NOT swap)', async ({ page }) => {
+	const list1 = page.locator('#list1');
 
-		const dragStartPosition = list1.locator('> *').nth(0);
-		const targetStartPosition = list1.locator('> *').nth(1);
+	const dragStartPosition = list1.locator('> *').nth(0);
+	const targetStartPosition = list1.locator('> *').nth(1);
 
-		const dragText = await dragStartPosition.innerText();
-		const targetText = await targetStartPosition.innerText();
+	const dragText = await dragStartPosition.innerText();
+	const targetText = await targetStartPosition.innerText();
 
-		const swapThreshold = 0.6;
-		const safetyMarginPx = 4;
+	const swapThreshold = 0.6;
 
-		await page.evaluate((threshold) => {
-			Sortable.get(document.getElementById('list1')).option(
-				'swapThreshold',
-				threshold
-			);
-		}, swapThreshold);
-
-		// Perform drag below boundary (isAboveThreshold = false)
-		await dragToThresholdWithDebug(
-			page,
-			dragStartPosition,
-			targetStartPosition,
-			swapThreshold,
-			safetyMarginPx,
-			false
+	await page.evaluate((threshold) => {
+		Sortable.get(document.getElementById('list1')).option(
+			'swapThreshold',
+			threshold
 		);
+	}, swapThreshold);
 
-		// Assert elements have NOT swapped
-		await expect(dragStartPosition).toHaveText(dragText);
-		await expect(targetStartPosition).toHaveText(targetText);
-	});
+	// Drag to the top buffer zone (0% to 20% height -> 67.4px Y)
+	await dragToThresholdWithDebug(
+		page,
+		dragStartPosition,
+		targetStartPosition,
+		swapThreshold,
+		'top'
+	);
 
-	test('Swap threshold - Above limit (SHOULD swap)', async ({ page }) => {
-		const list1 = page.locator('#list1');
+	// Assert elements have NOT swapped
+	await expect(dragStartPosition).toHaveText(dragText);
+	await expect(targetStartPosition).toHaveText(targetText);
+});
 
-		const dragStartPosition = list1.locator('> *').nth(0);
-		const targetStartPosition = list1.locator('> *').nth(1);
+test('Swap threshold - Central active zone (SHOULD swap)', async ({ page }) => {
+	const list1 = page.locator('#list1');
 
-		const dragText = await dragStartPosition.innerText();
-		const targetText = await targetStartPosition.innerText();
+	const dragStartPosition = list1.locator('> *').nth(0);
+	const targetStartPosition = list1.locator('> *').nth(1);
 
-		const swapThreshold = 0.6;
-		const safetyMarginPx = 4;
+	const dragText = await dragStartPosition.innerText();
+	const targetText = await targetStartPosition.innerText();
 
-		await page.evaluate((threshold) => {
-			Sortable.get(document.getElementById('list1')).option(
-				'swapThreshold',
-				threshold
-			);
-		}, swapThreshold);
+	const swapThreshold = 0.6;
 
-		// Perform drag above boundary (isAboveThreshold = true)
-		await dragToThresholdWithDebug(
-			page,
-			dragStartPosition,
-			targetStartPosition,
-			swapThreshold,
-			safetyMarginPx,
-			true
+	await page.evaluate((threshold) => {
+		Sortable.get(document.getElementById('list1')).option(
+			'swapThreshold',
+			threshold
 		);
+	}, swapThreshold);
 
-		const dragEndPosition = list1.locator('> *').nth(1);
-		const targetEndPosition = list1.locator('> *').nth(0);
+	// Drag to the central active zone (20% to 80% height -> 89px Y)
+	await dragToThresholdWithDebug(
+		page,
+		dragStartPosition,
+		targetStartPosition,
+		swapThreshold,
+		'center'
+	);
 
-		// Assert elements HAVE swapped
-		await expect(dragEndPosition).toHaveText(dragText);
-		await expect(targetEndPosition).toHaveText(targetText);
-	});
+	const dragEndPosition = list1.locator('> *').nth(1);
+	const targetEndPosition = list1.locator('> *').nth(0);
+
+	// Assert elements HAVE swapped
+	await expect(dragEndPosition).toHaveText(dragText);
+	await expect(targetEndPosition).toHaveText(targetText);
+});
+
+test('Swap threshold - Bottom buffer zone (should NOT swap)', async ({ page }) => {
+	const list1 = page.locator('#list1');
+
+	const dragStartPosition = list1.locator('> *').nth(0);
+	const targetStartPosition = list1.locator('> *').nth(1);
+
+	const dragText = await dragStartPosition.innerText();
+	const targetText = await targetStartPosition.innerText();
+
+	const swapThreshold = 0.6;
+
+	await page.evaluate((threshold) => {
+		Sortable.get(document.getElementById('list1')).option(
+			'swapThreshold',
+			threshold
+		);
+	}, swapThreshold);
+
+	// Drag to the bottom buffer zone (80% to 100% height -> 110.6px Y)
+	await dragToThresholdWithDebug(
+		page,
+		dragStartPosition,
+		targetStartPosition,
+		swapThreshold,
+		'bottom'
+	);
+
+	// Assert elements have NOT swapped
+	await expect(dragStartPosition).toHaveText(dragText);
+	await expect(targetStartPosition).toHaveText(targetText);
+});
+	
 
 	test('Invert swap', async ({ page }) => {
 		const list1 = page.locator('#list1');
