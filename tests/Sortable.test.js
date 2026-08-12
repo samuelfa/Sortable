@@ -91,12 +91,13 @@ async function dragToThresholdWithDebug(
  * Inverted Swap Geometry:
  * - Central Region: Neutral non-swap buffer -> SHOULD NOT SWAP
  * - Top / Bottom Outer Edges: Active swap zones -> SHOULD SWAP
+ * - Past Outer Edge: Past element boundary -> SHOULD SWAP
  *
  * @param {import('@playwright/test').Page} page - Playwright page object
  * @param {import('@playwright/test').Locator} source - Drag source element locator
  * @param {import('@playwright/test').Locator} target - Drag target element locator
  * @param {number} invertedSwapThreshold - Threshold parameter (e.g. 0.5 or 1.0)
- * @param {'center' | 'top' | 'bottom'} zone - Target zone to drop into
+ * @param {'center' | 'top' | 'bottom' | 'past_edge'} zone - Target zone to drop into
  */
 async function dragToInvertedThresholdWithDebug(
 	page,
@@ -109,6 +110,7 @@ async function dragToInvertedThresholdWithDebug(
 	const targetBox = await target.boundingBox();
 
 	const dragSteps = 1; // Single step prevents path overshoot events in Playwright
+	const safetyMarginPx = 4; // Safety buffer when dragging past outer edges
 
 	const centerY = targetBox.y + targetBox.height / 2;
 	const neutralBufferHalfHeight =
@@ -132,6 +134,10 @@ async function dragToInvertedThresholdWithDebug(
 	} else if (zone === 'bottom') {
 		// Midpoint of bottom edge swap region (bottomSwapBoundaryY to targetBottomY)
 		targetY = bottomSwapBoundaryY + (targetBottomY - bottomSwapBoundaryY) / 2;
+		expectedBehavior = 'SHOULD SWAP';
+	} else if (zone === 'past_edge') {
+		// Position past the bottom edge of the target element
+		targetY = targetBottomY + safetyMarginPx;
 		expectedBehavior = 'SHOULD SWAP';
 	}
 
