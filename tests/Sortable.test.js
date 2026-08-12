@@ -417,7 +417,7 @@ test.describe('Simple Sorting', () => {
 
 		await page.evaluate((threshold) => {
 			Sortable.get(document.getElementById('list1'))
-				.option('invertSwap', true);
+				.option('invertSwap', true)
 			    .option(
 				    'invertedSwapThreshold',
 				    threshold
@@ -452,7 +452,7 @@ test.describe('Simple Sorting', () => {
 		const invertedSwapThreshold = 0.5;
 
 		await page.evaluate((threshold) => {
-			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
+			Sortable.get(document.getElementById('list1')).option('invertSwap', true)
 			.option(
 				'invertedSwapThreshold',
 				threshold
