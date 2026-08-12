@@ -367,34 +367,34 @@ test.describe('Simple Sorting', () => {
 	});
 
 	test('Invert swap - Past outer edge (SHOULD swap)', async ({ page }) => {
-	const list1 = page.locator('#list1');
+		const list1 = page.locator('#list1');
 
-	const dragStartPosition = list1.locator('> *').nth(0);
-	const targetStartPosition = list1.locator('> *').nth(1);
+		const dragStartPosition = list1.locator('> *').nth(0);
+		const targetStartPosition = list1.locator('> *').nth(1);
 
-	const dragText = await dragStartPosition.innerText();
-	const targetText = await targetStartPosition.innerText();
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
 
-	await page.evaluate(() => {
-		Sortable.get(document.getElementById('list1')).option('invertSwap', true);
+		await page.evaluate(() => {
+			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
+		});
+
+		// Default threshold = 1.0.
+		// Swapping ONLY occurs when crossing PAST the target element's outer edge.
+		await dragToInvertedThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			1.0,
+			'past_edge'
+		);
+
+		const dragEndPosition = list1.locator('> *').nth(1);
+		const targetEndPosition = list1.locator('> *').nth(0);
+
+		await expect(dragEndPosition).toHaveText(dragText);
+		await expect(targetEndPosition).toHaveText(targetText);
 	});
-
-	// Default threshold = 1.0.
-	// Swapping ONLY occurs when crossing PAST the target element's outer edge.
-	await dragToInvertedThresholdWithDebug(
-		page,
-		dragStartPosition,
-		targetStartPosition,
-		1.0,
-		'past_edge'
-	);
-
-	const dragEndPosition = list1.locator('> *').nth(1);
-	const targetEndPosition = list1.locator('> *').nth(0);
-
-	await expect(dragEndPosition).toHaveText(dragText);
-	await expect(targetEndPosition).toHaveText(targetText);
-});
 
 	test('Inverted swap threshold - Central buffer zone (should NOT swap)', async ({
 		page,
