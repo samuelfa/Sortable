@@ -416,9 +416,8 @@ test.describe('Simple Sorting', () => {
 		const invertedSwapThreshold = 0.5;
 
 		await page.evaluate((threshold) => {
-			Sortable.get(document.getElementById('list1'))
-				.option('invertSwap', true)
-				.option('invertedSwapThreshold', threshold);
+			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
+			Sortable.get(document.getElementById('list1')).option('invertedSwapThreshold', threshold);
 		}, invertedSwapThreshold);
 
 		// Dragging into center neutral buffer (25% to 75% height) should NOT swap
@@ -449,9 +448,8 @@ test.describe('Simple Sorting', () => {
 		const invertedSwapThreshold = 0.5;
 
 		await page.evaluate((threshold) => {
-			Sortable.get(document.getElementById('list1'))
-				.option('invertSwap', true)
-				.option('invertedSwapThreshold', threshold);
+			Sortable.get(document.getElementById('list1')).option('invertSwap', true)
+			Sortable.get(document.getElementById('list1')).option('invertedSwapThreshold', threshold);
 		}, invertedSwapThreshold);
 
 		// Dragging into top edge active zone (0% to 25% height) SHOULD swap
