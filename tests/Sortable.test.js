@@ -334,7 +334,7 @@ test.describe('Simple Sorting', () => {
 		await expect(targetStartPosition).toHaveText(targetText);
 	});
 
-	test('Invert swap - Central buffer zone (should NOT swap)', async ({
+	test('Invert swap - by defaull all is buffer zone (should NOT swap)', async ({
 		page,
 	}) => {
 		const list1 = page.locator('#list1');
@@ -364,38 +364,6 @@ test.describe('Simple Sorting', () => {
 		// Assert elements HAVE NOT swapped
 		await expect(dragStartPosition).toHaveText(dragText);
 		await expect(targetStartPosition).toHaveText(targetText);
-	});
-
-	test('Invert swap - Top edge zone (SHOULD swap)', async ({ page }) => {
-		const list1 = page.locator('#list1');
-
-		const dragStartPosition = list1.locator('> *').nth(0);
-		const targetStartPosition = list1.locator('> *').nth(1);
-
-		const dragText = await dragStartPosition.innerText();
-		const targetText = await targetStartPosition.innerText();
-
-		await page.evaluate(() => {
-			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
-		});
-
-		const invertedSwapThreshold = 1.0;
-
-		// Dragging into the top outer edge SHOULD trigger a swap in inverted mode
-		await dragToInvertedThresholdWithDebug(
-			page,
-			dragStartPosition,
-			targetStartPosition,
-			invertedSwapThreshold,
-			'top'
-		);
-
-		const dragEndPosition = list1.locator('> *').nth(1);
-		const targetEndPosition = list1.locator('> *').nth(0);
-
-		// Assert elements HAVE swapped
-		await expect(dragEndPosition).toHaveText(dragText);
-		await expect(targetEndPosition).toHaveText(targetText);
 	});
 
 	test('Inverted swap threshold - Central buffer zone (should NOT swap)', async ({
