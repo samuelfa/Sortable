@@ -401,6 +401,20 @@ test.describe('Simple Sorting', () => {
 		await expect(dragEndPosition).toHaveText(dragText);
 		await expect(targetEndPosition).toHaveText(targetText);
 	});
+});
+
+test.describe('Inverted Swap Threshold Matrix', () => {
+	const invertedSwapThreshold = 0.5;
+
+	test.beforeEach(async ({ page }) => {
+		await page.evaluate((threshold) => {
+			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
+			Sortable.get(document.getElementById('list1')).option(
+				'invertedSwapThreshold',
+				threshold
+			);
+		}, invertedSwapThreshold);
+	});
 
 	test('Inverted swap threshold - Central buffer zone (should NOT swap)', async ({
 		page,
@@ -412,16 +426,6 @@ test.describe('Simple Sorting', () => {
 
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
-
-		const invertedSwapThreshold = 0.5;
-
-		await page.evaluate((threshold) => {
-			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
-			Sortable.get(document.getElementById('list1')).option(
-				'invertedSwapThreshold',
-				threshold
-			);
-		}, invertedSwapThreshold);
 
 		// Dragging into center neutral buffer (25% to 75% height) should NOT swap
 		await dragToInvertedThresholdWithDebug(
@@ -437,28 +441,21 @@ test.describe('Simple Sorting', () => {
 		await expect(targetStartPosition).toHaveText(targetText);
 	});
 
-	test('Inverted swap threshold - Top edge zone (SHOULD swap)', async ({
-		page,
-	}) => {
+	// 1. DOWNWARD DRAG - TOP ZONE (NO SWAP)
+	test('Downward drag to top zone (should NOT swap)', async ({ page }) => {
 		const list1 = page.locator('#list1');
-
 		const dragStartPosition = list1.locator('> *').nth(0);
 		const targetStartPosition = list1.locator('> *').nth(1);
 
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
-		const invertedSwapThreshold = 0.5;
-
-		await page.evaluate((threshold) => {
-			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
-			Sortable.get(document.getElementById('list1')).option(
-				'invertedSwapThreshold',
-				threshold
-			);
-		}, invertedSwapThreshold);
-
-		// Dragging into top edge active zone (0% to 25% height) SHOULD swap
+		/*
+		 * DOWNWARD DRAG TO TOP ZONE:
+		 * Dragging Item 0 down to the top region of Item 1 tells SortableJS
+		 * to place Item 0 BEFORE Item 1. Since Item 0 is already before Item 1,
+		 * the DOM order remains unchanged.
+		 */
 		await dragToInvertedThresholdWithDebug(
 			page,
 			dragStartPosition,
@@ -467,10 +464,91 @@ test.describe('Simple Sorting', () => {
 			'top'
 		);
 
+		await expect(dragStartPosition).toHaveText(dragText);
+		await expect(targetStartPosition).toHaveText(targetText);
+	});
+
+	// 2. DOWNWARD DRAG - BOTTOM ZONE (SHOULD SWAP)
+	test('Downward drag to bottom zone (SHOULD swap)', async ({ page }) => {
+		const list1 = page.locator('#list1');
+		const dragStartPosition = list1.locator('> *').nth(0);
+		const targetStartPosition = list1.locator('> *').nth(1);
+
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
+
+		/*
+		 * DOWNWARD DRAG TO BOTTOM ZONE:
+		 * Dragging Item 0 down past the 75% threshold line of Item 1 tells SortableJS
+		 * to place Item 0 AFTER Item 1, executing a valid DOM swap.
+		 */
+		await dragToInvertedThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			invertedSwapThreshold,
+			'bottom'
+		);
+
 		const dragEndPosition = list1.locator('> *').nth(1);
 		const targetEndPosition = list1.locator('> *').nth(0);
 
-		// Assert elements HAVE swapped
+		await expect(dragEndPosition).toHaveText(dragText);
+		await expect(targetEndPosition).toHaveText(targetText);
+	});
+
+	// 3. UPWARD DRAG - BOTTOM ZONE (NO SWAP)
+	test('Upward drag to bottom zone (should NOT swap)', async ({ page }) => {
+		const list1 = page.locator('#list1');
+		const dragStartPosition = list1.locator('> *').nth(1);
+		const targetStartPosition = list1.locator('> *').nth(0);
+
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
+
+		/*
+		 * UPWARD DRAG TO BOTTOM ZONE:
+		 * Dragging Item 1 up to the bottom region of Item 0 tells SortableJS
+		 * to place Item 1 AFTER Item 0. Since Item 1 is already after Item 0,
+		 * no swap occurs.
+		 */
+		await dragToInvertedThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			invertedSwapThreshold,
+			'bottom'
+		);
+
+		await expect(dragStartPosition).toHaveText(dragText);
+		await expect(targetStartPosition).toHaveText(targetText);
+	});
+
+	// 4. UPWARD DRAG - TOP ZONE (SHOULD SWAP)
+	test('Upward drag to top zone (SHOULD swap)', async ({ page }) => {
+		const list1 = page.locator('#list1');
+		const dragStartPosition = list1.locator('> *').nth(1);
+		const targetStartPosition = list1.locator('> *').nth(0);
+
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
+
+		/*
+		 * UPWARD DRAG TO TOP ZONE:
+		 * Dragging Item 1 up past the 25% threshold line of Item 0 tells SortableJS
+		 * to place Item 1 BEFORE Item 0, executing a valid upward DOM swap.
+		 */
+		await dragToInvertedThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			invertedSwapThreshold,
+			'top'
+		);
+
+		const dragEndPosition = list1.locator('> *').nth(0);
+		const targetEndPosition = list1.locator('> *').nth(1);
+
 		await expect(dragEndPosition).toHaveText(dragText);
 		await expect(targetEndPosition).toHaveText(targetText);
 	});
