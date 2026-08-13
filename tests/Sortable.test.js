@@ -407,6 +407,7 @@ test.describe('Inverted Swap Threshold Matrix', () => {
 	const invertedSwapThreshold = 0.5;
 
 	test.beforeEach(async ({ page }) => {
+		await page.goto('/tests/single-list.html');
 		await page.evaluate((threshold) => {
 			Sortable.get(document.getElementById('list1')).option('invertSwap', true);
 			Sortable.get(document.getElementById('list1')).option(
