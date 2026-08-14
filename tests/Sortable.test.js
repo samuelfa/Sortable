@@ -803,7 +803,7 @@ test.describe('Nested', () => {
 		 * moving past the lower region of targetBox to trigger insertion into level 0.
 		 */
 		const targetX = targetBox.x + targetBox.width / 2;
-		const targetY = targetBox.y + targetBox.height * 0.80; // 80% mark of Item 1.3
+		const targetY = targetBox.y + targetBox.height * 0.8; // 80% mark of Item 1.3
 
 		await page.mouse.move(startX, startY);
 		await page.mouse.down();
@@ -836,7 +836,7 @@ test.describe('Nested', () => {
 		const startY = sourceBox.y + sourceBox.height / 2;
 
 		const targetX = targetBox.x + targetBox.width / 2;
-		const targetY = targetBox.y + targetBox.height * 0.80;
+		const targetY = targetBox.y + targetBox.height * 0.8;
 
 		await page.mouse.move(startX, startY);
 		await page.mouse.down();
