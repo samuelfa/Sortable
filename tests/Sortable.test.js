@@ -783,15 +783,32 @@ test.describe('Nested', () => {
 		const list1 = page.locator('#list1');
 		const list1n1 = page.locator('.n1').first();
 
+		// Origin: Item 2.1 (inside .n1)
 		const dragStartPosition = list1n1.locator('> *').nth(0);
+		// Target: Item 1.3 (inside #list1)
 		const targetStartPosition = list1.locator('> *').nth(2);
 
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
-		await dragStartPosition.dragTo(targetStartPosition, {
-			targetPosition: { x: 10, y: 10 },
-		});
+		const sourceBox = await dragStartPosition.boundingBox();
+		const targetBox = await targetStartPosition.boundingBox();
+
+		// Calculate exact centers to bypass Playwright pointer interception
+		const startX = sourceBox.x + sourceBox.width / 2;
+		const startY = sourceBox.y + sourceBox.height / 2;
+
+		/*
+		 * Due to invertSwap: true on all lists, dragging DOWN into Item 1.3 requires
+		 * moving past the lower region of targetBox to trigger insertion into level 0.
+		 */
+		const targetX = targetBox.x + targetBox.width / 2;
+		const targetY = targetBox.y + targetBox.height * 0.80; // 80% mark of Item 1.3
+
+		await page.mouse.move(startX, startY);
+		await page.mouse.down();
+		await page.mouse.move(targetX, targetY, { steps: 5 });
+		await page.mouse.up();
 
 		const dragEndPosition = list1.locator('> *').nth(2);
 		const targetEndPosition = list1.locator('> *').nth(3);
@@ -804,15 +821,27 @@ test.describe('Nested', () => {
 		const list1 = page.locator('#list1');
 		const list1n2 = page.locator('.n2').first();
 
+		// Origin: Item 1.2 (inside #list1)
 		const dragStartPosition = list1.locator('> *').nth(1);
+		// Target: Item 3.3 (inside .n2)
 		const targetStartPosition = list1n2.locator('> *').nth(2);
 
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
-		await dragStartPosition.dragTo(targetStartPosition, {
-			targetPosition: { x: 10, y: 10 },
-		});
+		const sourceBox = await dragStartPosition.boundingBox();
+		const targetBox = await targetStartPosition.boundingBox();
+
+		const startX = sourceBox.x + sourceBox.width / 2;
+		const startY = sourceBox.y + sourceBox.height / 2;
+
+		const targetX = targetBox.x + targetBox.width / 2;
+		const targetY = targetBox.y + targetBox.height * 0.80;
+
+		await page.mouse.move(startX, startY);
+		await page.mouse.down();
+		await page.mouse.move(targetX, targetY, { steps: 5 });
+		await page.mouse.up();
 
 		const dragEndPosition = list1n2.locator('> *').nth(2);
 		const targetEndPosition = list1n2.locator('> *').nth(3);
