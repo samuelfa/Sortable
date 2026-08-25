@@ -25,10 +25,15 @@ async function dragToThresholdWithDebug(
 
 	// Desktop: single precise move (native DnD path; extra events cross swap zones).
 	// Mobile: several steps + settling so Sortable's pointer fallback engages.
-	const isMobile = test.info().project.name === 'mobile-touch';
+	// Mobile and WebKit run on Sortable's fallback path: activate with a tiny
+	// nudge inside the source item, then jump to the target point.
+	const usesNudge = ['mobile-touch', 'webkit'].includes(
+		test.info().project.name
+	);
 	const dragSteps = 1;
-	const settleAfterDown = isMobile ? 60 : 0;
-	const settleBeforeUp = isMobile ? 120 : 0;
+	// Settling lets each engine's native drag loop engage before the move.
+	const settleAfterDown = usesNudge ? 60 : 100;
+	const settleBeforeUp = usesNudge ? 120 : 150;
 
 	// 1. Calculate 3-zone geometry from target center (50% mark)
 	const centerY = targetBox.y + targetBox.height / 2;
@@ -87,7 +92,7 @@ async function dragToThresholdWithDebug(
 	await page.mouse.move(startX, startY);
 	await page.mouse.down();
 	if (settleAfterDown) await page.waitForTimeout(settleAfterDown);
-	if (isMobile) {
+	if (usesNudge) {
 		// Tiny nudge that stays inside the source item: engages Sortable's
 		// pointer fallback without hovering any other swap zone.
 		await page.mouse.move(startX + 3, startY);
@@ -124,10 +129,15 @@ async function dragToInvertedThresholdWithDebug(
 
 	// Desktop: single precise move (native DnD path; extra events cross swap zones).
 	// Mobile: several steps + settling so Sortable's pointer fallback engages.
-	const isMobile = test.info().project.name === 'mobile-touch';
+	// Mobile and WebKit run on Sortable's fallback path: activate with a tiny
+	// nudge inside the source item, then jump to the target point.
+	const usesNudge = ['mobile-touch', 'webkit'].includes(
+		test.info().project.name
+	);
 	const dragSteps = 1;
-	const settleAfterDown = isMobile ? 60 : 0;
-	const settleBeforeUp = isMobile ? 120 : 0;
+	// Settling lets each engine's native drag loop engage before the move.
+	const settleAfterDown = usesNudge ? 60 : 100;
+	const settleBeforeUp = usesNudge ? 120 : 150;
 	const safetyMarginPx = 4; // Safety buffer when dragging past outer edges
 
 	const centerY = targetBox.y + targetBox.height / 2;
@@ -190,7 +200,7 @@ async function dragToInvertedThresholdWithDebug(
 	await page.mouse.move(startX, startY);
 	await page.mouse.down();
 	if (settleAfterDown) await page.waitForTimeout(settleAfterDown);
-	if (isMobile) {
+	if (usesNudge) {
 		// Tiny nudge that stays inside the source item: engages Sortable's
 		// pointer fallback without hovering any other swap zone.
 		await page.mouse.move(startX + 3, startY);
@@ -808,31 +818,13 @@ test.describe('Nested', () => {
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
-		const sourceBox = await dragStartPosition.boundingBox();
-		const targetBox = await targetStartPosition.boundingBox();
-
-		// Calculate exact centers to bypass Playwright pointer interception
-		const startX = sourceBox.x + sourceBox.width / 2;
-		const startY = sourceBox.y + sourceBox.height / 2;
-
 		/*
 		 * Due to invertSwap: true on all lists, dropping past the midpoint (80%) of
 		 * Item 1.3 inserts dragEl AFTER the target into level 0.
 		 */
-		const targetX = targetBox.x + targetBox.width / 2;
-		const targetY = targetBox.y + targetBox.height * 0.8; // 80% mark of Item 1.3
-
-		await page.mouse.move(startX, startY);
-		await page.mouse.down();
-		/*
-		 * Chromium initiates a native HTML5 drag (dragEl.draggable = true); give the
-		 * browser's drag loop time to engage, otherwise the next synthetic events
-		 * are swallowed and the drag never completes.
-		 */
-		await page.waitForTimeout(100);
-		await page.mouse.move(targetX, targetY, { steps: 5 });
-		await page.waitForTimeout(150);
-		await page.mouse.up();
+		await dragAndDrop(page, dragStartPosition, targetStartPosition, {
+			targetPosition: { x: 0.5, y: 0.8 },
+		});
 
 		const dragEndPosition = list1.locator('> *').nth(3);
 		const targetEndPosition = list1.locator('> *').nth(2);
@@ -853,21 +845,9 @@ test.describe('Nested', () => {
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
-		const sourceBox = await dragStartPosition.boundingBox();
-		const targetBox = await targetStartPosition.boundingBox();
-
-		const startX = sourceBox.x + sourceBox.width / 2;
-		const startY = sourceBox.y + sourceBox.height / 2;
-
-		const targetX = targetBox.x + targetBox.width / 2;
-		const targetY = targetBox.y + targetBox.height * 0.8;
-
-		await page.mouse.move(startX, startY);
-		await page.mouse.down();
-		await page.waitForTimeout(100); // see note in 'Dragging from level 1 to level 0'
-		await page.mouse.move(targetX, targetY, { steps: 5 });
-		await page.waitForTimeout(150);
-		await page.mouse.up();
+		await dragAndDrop(page, dragStartPosition, targetStartPosition, {
+			targetPosition: { x: 0.5, y: 0.8 },
+		});
 
 		// Dropping past the midpoint (80%) inserts dragEl AFTER the target
 		const dragEndPosition = list1n2.locator('> *').nth(3);

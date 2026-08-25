@@ -25,10 +25,16 @@
 
 
 <script src="../Sortable.js"></script>
+<script type="text/javascript">
+	function testSortableOptions() {
+		return window.__sortableTestOptions || {};
+	}
+</script>
+
 
 <script type="text/javascript">
-	new Sortable(document.getElementById('list1'), { group: 'shared' });
-	new Sortable(document.getElementById('list2'), { });
+	new Sortable(document.getElementById('list1'), { ...testSortableOptions(), group: 'shared' });
+	new Sortable(document.getElementById('list2'), { ...testSortableOptions() });
 </script>
 
 </body>

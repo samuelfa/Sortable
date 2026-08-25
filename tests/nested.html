@@ -60,13 +60,15 @@
 <script src="../Sortable.js"></script>
 
 <script type="text/javascript">
+	function testSortableOptions() {
+		return window.__sortableTestOptions || {};
+	}
+
 	var elements = document.getElementsByClassName('list');
+	var options = Object.assign({ group: 'shared', invertSwap: true }, testSortableOptions());
 
 	for (var i = 0; i < elements.length; i++) {
-		new Sortable(elements[i], {
-			group: 'shared',
-			invertSwap: true
-		});
+		new Sortable(elements[i], options);
 	}
 </script>
 

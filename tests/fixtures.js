@@ -11,12 +11,19 @@ import { test as base, expect } from '@playwright/test';
  * events, which need several move steps and a beat of settling to engage.
  */
 function dragProfile() {
-	const isMobile = test.info().project.name === 'mobile-touch';
+	const name = test.info().project.name;
+	const isMobile = name === 'mobile-touch';
+	// WebKit runs on the forced fallback path (see page fixture): it activates on
+	// the first move and needs a follow-up move to process the insertion, so it
+	// uses the same nudge pattern as mobile.
+	const usesNudge = isMobile || name === 'webkit';
 	return {
-		steps: isMobile ? 1 : 1,
-		afterDown: isMobile ? 60 : 0,
-		beforeUp: isMobile ? 120 : 0,
-		isMobile,
+		steps: 1,
+		// Settling after mousedown lets every engine's native HTML5 drag loop
+		// engage before the move (WebKit and Chromium both race without it).
+		afterDown: usesNudge ? 60 : 100,
+		beforeUp: usesNudge ? 120 : 150,
+		isMobile: usesNudge,
 	};
 }
 
@@ -58,6 +65,20 @@ export async function dragAndDrop(
 export const test = base.extend({
 	page: async ({ page }, use, testInfo) => {
 		const logs = [];
+
+		/*
+		 * WebKit's native HTML5 drag races the synthetic input stream under
+		 * parallel workers (drags silently drop). Force Sortable's deterministic
+		 * pointer-fallback path there; other engines keep native DnD coverage.
+		 */
+		if (testInfo.project.name === 'webkit') {
+			await page.addInitScript(() => {
+				window.__sortableTestOptions = {
+					forceFallback: true,
+					supportPointer: false,
+				};
+			});
+		}
 
 		// 1. Capturar errores JS de la página y de consola
 		page.on('pageerror', (error) =>

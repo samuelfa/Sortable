@@ -19,9 +19,15 @@
 
 
 <script src="../Sortable.js"></script>
+<script type="text/javascript">
+	function testSortableOptions() {
+		return window.__sortableTestOptions || {};
+	}
+</script>
+
 
 <script type="text/javascript">
-	new Sortable(document.getElementById('list1'), { handle: '.handle' });
+	new Sortable(document.getElementById('list1'), { ...testSortableOptions(), handle: '.handle' });
 </script>
 
 </body>
