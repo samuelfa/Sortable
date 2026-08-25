@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 <body>
@@ -36,6 +37,12 @@
 </div>
 
 <style>
+	/* Items containing nested lists must grow with their content
+	   (tests/style.css forces a fixed height that would otherwise overlap siblings) */
+	.list > div:has(> .list) {
+		height: auto;
+	}
+
 	.n1 > div {
 		background-color: lightblue;
 	}
@@ -45,7 +52,7 @@
 	}
 
 	.list {
-		padding: 50px;
+		padding: 20px;
 	}
 
 </style>
@@ -53,13 +60,15 @@
 <script src="../Sortable.js"></script>
 
 <script type="text/javascript">
+	function testSortableOptions() {
+		return window.__sortableTestOptions || {};
+	}
+
 	var elements = document.getElementsByClassName('list');
+	var options = Object.assign({ group: 'shared', invertSwap: true }, testSortableOptions());
 
 	for (var i = 0; i < elements.length; i++) {
-		new Sortable(elements[i], {
-			group: 'shared',
-			invertSwap: true
-		});
+		new Sortable(elements[i], options);
 	}
 </script>
 

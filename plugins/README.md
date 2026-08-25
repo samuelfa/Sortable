@@ -1,6 +1,6 @@
 # Creating Sortable Plugins
-Sortable plugins are plugins that can be directly mounted to the Sortable class. They are a powerful way of modifying the default behaviour of Sortable beyond what simply using events alone allows. To mount your plugin to Sortable, it must pass a constructor function to the `Sortable.mount` function. This constructor function will be called (with the `new` keyword in front of it) whenever a Sortable instance with your plugin enabled is initialized. The constructor function will be called with the parameters `sortable` and `el`, which is the HTMLElement that the Sortable is being initialized on. This means that there will be a new instance of your plugin each time it is enabled in a Sortable.
 
+Sortable plugins are plugins that can be directly mounted to the Sortable class. They are a powerful way of modifying the default behaviour of Sortable beyond what simply using events alone allows. To mount your plugin to Sortable, it must pass a constructor function to the `Sortable.mount` function. This constructor function will be called (with the `new` keyword in front of it) whenever a Sortable instance with your plugin enabled is initialized. The constructor function will be called with the parameters `sortable` and `el`, which is the HTMLElement that the Sortable is being initialized on. This means that there will be a new instance of your plugin each time it is enabled in a Sortable.
 
 ## Constructor Parameters
 
@@ -10,8 +10,8 @@ Sortable plugins are plugins that can be directly mounted to the Sortable class.
 
 `options: Object` — The options object that the user has passed into Sortable (not merged with defaults yet)
 
-
 ## Static Properties
+
 The constructor function passed to `Sortable.mount` may contain several static properties and methods. The following static properties may be defined:
 
 `pluginName: String` (Required)
@@ -40,65 +40,68 @@ Example:
 Plugin.name = 'generateTitle';
 Plugin.optionListeners = {
 	// Listen for option 'generateTitle'
-	generateTitle: function(title) {
+	generateTitle: function (title) {
 		// Store the option in all caps
 		return title.toUpperCase();
 
 		// OR save it to this instance of your plugin as a private field.
 		// This way it can be accessed in events, but will not modify the user's options.
 		this.titleAllCaps = title.toUpperCase();
-	}
+	},
 };
-
-``` 
+```
 
 ## Plugin Options
+
 Plugins may have custom default options or may override the defaults of other options. In order to do this, there must be a `defaults` object on the initialized plugin. This can be set in the plugin's prototype, or during the initialization of the plugin (when the `el` is available). For example:
 
 ```js
 function myPlugin(sortable, el, options) {
 	this.defaults = {
-		color: el.style.backgroundColor
+		color: el.style.backgroundColor,
 	};
 }
 
 Sortable.mount(myPlugin);
 ```
 
-
 ## Plugin Events
 
 ### Context
+
 The events will be fired in the context of their own parent object (ie. context is not changed), however the plugin instance's Sortable instance is available under `this.sortable`. Likewise, the options are available under `this.options`.
 
 ### Event List
+
 The following table contains details on the events that a plugin may handle in the prototype of the plugin's constructor function.
 
-| Event Name                | Description                                                                                                      | Cancelable? | Cancel Behaviour                                   | Event Type | Custom Event Object Properties                                          |
-|---------------------------|------------------------------------------------------------------------------------------------------------------|-------------|----------------------------------------------------|------------|-------------------------------------------------------------------------|
-| filter                    | Fired when the element is filtered, and dragging is therefore canceled                                           | No          | -                                                  | Normal     | None                                                                    |
-| delayStart                | Fired when the delay starts, even if there is no delay                                                           | Yes         | Cancels sorting                                    | Normal     | None                                                                    |
-| delayEnded                | Fired when the delay ends, even if there is no delay                                                             | Yes         | Cancels sorting                                    | Normal     | None                                                                    |
-| setupClone                | Fired when Sortable clones the dragged element                                                                   | Yes         | Cancels normal clone setup                         | Normal     | None                                                                    |
-| dragStart                 | Fired when the dragging is first started                                                                         | Yes         | Cancels sorting                                    | Normal     | None                                                                    |
-| clone                     | Fired when the clone is inserted into the DOM (if `removeCloneOnHide: false`). Tick after dragStart.             | Yes         | Cancels normal clone insertion & hiding            | Normal     | None                                                                    |
-| dragStarted               | Fired tick after dragStart                                                                                       | No          | -                                                  | Normal     | None                                                                    |
-| dragOver                  | Fired when the user drags over a sortable                                                                        | Yes         | Cancels normal dragover behaviour                  | DragOver   | None                                                                    |
-| dragOverValid             | Fired when the user drags over a sortable that the dragged item can be inserted into                             | Yes         | Cancels normal valid dragover behaviour            | DragOver   | None                                                                    |
-| revert                    | Fired when the dragged item is reverted to it's original position when entering it's `sort:false` root           | Yes         | Cancels normal reverting, but is still completed() | DragOver   | None                                                                    |
-| dragOverCompleted         | Fired when dragOver is completed (ie. bubbling is disabled). To check if inserted, use `inserted` even property. | No          | -                                                  | DragOver   | `insertion: Boolean` — Whether or not the dragged element was inserted  |
-| dragOverAnimationCapture  | Fired right before the animation state is captured in dragOver                                                   | No          | -                                                  | DragOver   | None                                                                    |
-| dragOverAnimationComplete | Fired after the animation is completed after a dragOver insertion                                                | No          | -                                                  | DragOver   | None                                                                    |
-| drop                      | Fired on drop                                                                                                    | Yes         | Cancels normal drop behavior                       | Normal     | None                                                                    |
-| nulling                   | Fired when the plugin should preform cleanups, once all drop events have fired                                   | No          | -                                                  | Normal     | None                                                                    |
-| destroy                   | Fired when Sortable is destroyed                                                                                 | No          | -                                                  | Normal     | None                                                                    |
+| Event Name                | Description                                                                                                      | Cancelable? | Cancel Behaviour                                   | Event Type | Custom Event Object Properties                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------- | ---------- | ---------------------------------------------------------------------- |
+| filter                    | Fired when the element is filtered, and dragging is therefore canceled                                           | No          | -                                                  | Normal     | None                                                                   |
+| delayStart                | Fired when the delay starts, even if there is no delay                                                           | Yes         | Cancels sorting                                    | Normal     | None                                                                   |
+| delayEnded                | Fired when the delay ends, even if there is no delay                                                             | Yes         | Cancels sorting                                    | Normal     | None                                                                   |
+| setupClone                | Fired when Sortable clones the dragged element                                                                   | Yes         | Cancels normal clone setup                         | Normal     | None                                                                   |
+| dragStart                 | Fired when the dragging is first started                                                                         | Yes         | Cancels sorting                                    | Normal     | None                                                                   |
+| clone                     | Fired when the clone is inserted into the DOM (if `removeCloneOnHide: false`). Tick after dragStart.             | Yes         | Cancels normal clone insertion & hiding            | Normal     | None                                                                   |
+| dragStarted               | Fired tick after dragStart                                                                                       | No          | -                                                  | Normal     | None                                                                   |
+| dragOver                  | Fired when the user drags over a sortable                                                                        | Yes         | Cancels normal dragover behaviour                  | DragOver   | None                                                                   |
+| dragOverValid             | Fired when the user drags over a sortable that the dragged item can be inserted into                             | Yes         | Cancels normal valid dragover behaviour            | DragOver   | None                                                                   |
+| revert                    | Fired when the dragged item is reverted to it's original position when entering it's `sort:false` root           | Yes         | Cancels normal reverting, but is still completed() | DragOver   | None                                                                   |
+| dragOverCompleted         | Fired when dragOver is completed (ie. bubbling is disabled). To check if inserted, use `inserted` even property. | No          | -                                                  | DragOver   | `insertion: Boolean` — Whether or not the dragged element was inserted |
+| dragOverAnimationCapture  | Fired right before the animation state is captured in dragOver                                                   | No          | -                                                  | DragOver   | None                                                                   |
+| dragOverAnimationComplete | Fired after the animation is completed after a dragOver insertion                                                | No          | -                                                  | DragOver   | None                                                                   |
+| drop                      | Fired on drop                                                                                                    | Yes         | Cancels normal drop behavior                       | Normal     | None                                                                   |
+| nulling                   | Fired when the plugin should preform cleanups, once all drop events have fired                                   | No          | -                                                  | Normal     | None                                                                   |
+| destroy                   | Fired when Sortable is destroyed                                                                                 | No          | -                                                  | Normal     | None                                                                   |
 
 ### Global Events
+
 Normally, an event will only be fired in a plugin if the plugin is enabled on the Sortable from which the event is being fired. However, it sometimes may be desirable for a plugin to listen in on an event from Sortables in which it is not enabled on. This is possible with global events. For an event to be global, simply add the suffix 'Global' to the event's name (casing matters) (eg. `dragStartGlobal`).
 Please note that your plugin must be initialized on any Sortable from which it expects to recieve events, and that includes global events. In other words, you will want to keep the `initializeByDefault` option as it's default `true` value if your plugin needs to recieve events from Sortables it is not enabled on.
 Please also note that if both normal and global event handlers are set, the global event handler will always be fired before the regular one.
 
 ### Event Object
+
 An object with the following properties is passed as an argument to each plugin event when it is fired.
 
 #### Properties:
@@ -119,7 +122,7 @@ An object with the following properties is passed as an argument to each plugin 
 
 `dragStarted: Boolean` — Boolean indicating whether or not the dragStart event has fired
 
-`putSortable: Sortable|undefined` — The element that dragEl is dragged into from it's root, otherwise undefined 
+`putSortable: Sortable|undefined` — The element that dragEl is dragged into from it's root, otherwise undefined
 
 `activeSortable: Sortable` — The active Sortable instance
 
@@ -133,7 +136,6 @@ An object with the following properties is passed as an argument to each plugin 
 
 `newDraggableIndex: Number` — The new index of dragEl, only counting draggable elements
 
-
 #### Methods:
 
 `cloneNowHidden()` — Function to be called if the plugin has hidden the clone
@@ -146,8 +148,8 @@ An object with the following properties is passed as an argument to each plugin 
 
 `dispatchSortableEvent(eventName: String)` — Function that can be used to emit an event on the current sortable while sorting, with all usual event properties set (eg. indexes, rootEl, cloneEl, originalEvent, etc.).
 
-
 ### DragOverEvent Object
+
 This event is passed to dragover events, and extends the normal event object.
 
 #### Properties:
@@ -167,7 +169,6 @@ This event is passed to dragover events, and extends the normal event object.
 `fromSortable: Sortable` — The sortable that the dragged element is coming from
 
 `target: HTMLElement` — The sortable item that is being dragged over
-
 
 #### Methods:
 

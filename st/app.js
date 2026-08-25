@@ -15,82 +15,88 @@ var example1 = document.getElementById('example1'),
 // Example 1 - Simple list
 new Sortable(example1, {
 	animation: 150,
-	ghostClass: 'blue-background-class'
+	ghostClass: 'blue-background-class',
 });
-
 
 // Example 2 - Shared lists
 new Sortable(example2Left, {
 	group: 'shared', // set both lists to same group
-	animation: 150
+	animation: 150,
 });
 
 new Sortable(example2Right, {
 	group: 'shared',
-	animation: 150
+	animation: 150,
 });
 
 // Example 3 - Cloning
 new Sortable(example3Left, {
 	group: {
 		name: 'shared',
-		pull: 'clone' // To clone: set pull to 'clone'
+		pull: 'clone', // To clone: set pull to 'clone'
 	},
-	animation: 150
+	animation: 150,
 });
 
 new Sortable(example3Right, {
 	group: {
 		name: 'shared',
-		pull: 'clone'
+		pull: 'clone',
 	},
-	animation: 150
+	animation: 150,
 });
-
 
 // Example 4 - No Sorting
 new Sortable(example4Left, {
 	group: {
 		name: 'shared',
 		pull: 'clone',
-		put: false // Do not allow items to be put into this list
+		put: false, // Do not allow items to be put into this list
 	},
 	animation: 150,
-	sort: false // To disable sorting: set sort to false
+	sort: false, // To disable sorting: set sort to false
 });
 
 new Sortable(example4Right, {
 	group: 'shared',
-	animation: 150
+	animation: 150,
 });
-
 
 // Example 5 - Handle
 new Sortable(example5, {
-    handle: '.handle', // handle class
-    animation: 150
+	handle: '.handle', // handle class
+	animation: 150,
 });
 
 // Example 6 - Filter
 new Sortable(example6, {
-    filter: '.filtered',
-    animation: 150
+	filter: '.filtered',
+	animation: 150,
 });
 
 // Example 7 - Thresholds
 var example7Sortable = new Sortable(example7, {
-    animation: 150
+	animation: 150,
 });
 
-
 var example7SwapThreshold = 1;
-var example7SwapThresholdInput = document.getElementById('example7SwapThresholdInput');
-var example7SwapThresholdCode = document.getElementById('example7SwapThresholdCode');
-var example7SwapThresholdIndicators = [].slice.call(document.querySelectorAll('.swap-threshold-indicator'));
+var example7SwapThresholdInput = document.getElementById(
+	'example7SwapThresholdInput'
+);
+var example7SwapThresholdCode = document.getElementById(
+	'example7SwapThresholdCode'
+);
+var example7SwapThresholdIndicators = [].slice.call(
+	document.querySelectorAll('.swap-threshold-indicator')
+);
 
-var example7InvertSwapInput = document.getElementById('example7InvertSwapInput');
+var example7InvertSwapInput = document.getElementById(
+	'example7InvertSwapInput'
+);
 var example7InvertSwapCode = document.getElementById('example7InvertSwapCode');
-var example7InvertedSwapThresholdIndicators = [].slice.call(document.querySelectorAll('.inverted-swap-threshold-indicator'));
+var example7InvertedSwapThresholdIndicators = [].slice.call(
+	document.querySelectorAll('.inverted-swap-threshold-indicator')
+);
 
 var example7Squares = [].slice.call(document.querySelectorAll('.square'));
 
@@ -99,14 +105,18 @@ var activeIndicators = example7SwapThresholdIndicators;
 var example7DirectionInput = document.getElementById('example7DirectionInput');
 var example7SizeProperty = 'width';
 
-
 function renderThresholdWidth(evt) {
 	example7SwapThreshold = Number(evt.target.value);
-	example7SwapThresholdCode.innerHTML = evt.target.value.indexOf('.') > -1 ? (evt.target.value + '0000').slice(0, 4) : evt.target.value;
+	example7SwapThresholdCode.innerHTML =
+		evt.target.value.indexOf('.') > -1
+			? (evt.target.value + '0000').slice(0, 4)
+			: evt.target.value;
 
 	for (var i = 0; i < activeIndicators.length; i++) {
-		activeIndicators[i].style[example7SizeProperty] = (evt.target.value * 100) /
-			(activeIndicators == example7SwapThresholdIndicators ? 1 : 2) + '%';
+		activeIndicators[i].style[example7SizeProperty] =
+			(evt.target.value * 100) /
+				(activeIndicators == example7SwapThresholdIndicators ? 1 : 2) +
+			'%';
 	}
 
 	example7Sortable.option('swapThreshold', example7SwapThreshold);
@@ -115,16 +125,14 @@ function renderThresholdWidth(evt) {
 example7SwapThresholdInput.addEventListener('input', renderThresholdWidth);
 example7SwapThresholdInput.addEventListener('change', renderThresholdWidth);
 
-example7InvertSwapInput.addEventListener('change', function(evt) {
+example7InvertSwapInput.addEventListener('change', function (evt) {
 	example7Sortable.option('invertSwap', evt.target.checked);
-
 
 	for (var i = 0; i < activeIndicators.length; i++) {
 		activeIndicators[i].style.display = 'none';
 	}
 
 	if (evt.target.checked) {
-
 		example7InvertSwapCode.style.display = '';
 
 		activeIndicators = example7InvertedSwapThresholdIndicators;
@@ -134,7 +142,7 @@ example7InvertSwapInput.addEventListener('change', function(evt) {
 	}
 
 	renderThresholdWidth({
-		target: example7SwapThresholdInput
+		target: example7SwapThresholdInput,
 	});
 
 	for (i = 0; i < activeIndicators.length; i++) {
@@ -144,13 +152,16 @@ example7InvertSwapInput.addEventListener('change', function(evt) {
 
 function renderDirection(evt) {
 	for (var i = 0; i < example7Squares.length; i++) {
-		example7Squares[i].style.display = evt.target.value === 'h' ? 'inline-block' : 'block';
+		example7Squares[i].style.display =
+			evt.target.value === 'h' ? 'inline-block' : 'block';
 	}
 
 	for (i = 0; i < example7InvertedSwapThresholdIndicators.length; i++) {
 		/* jshint expr:true */
-		evt.target.value === 'h' && (example7InvertedSwapThresholdIndicators[i].style.height = '100%');
-		evt.target.value === 'v' && (example7InvertedSwapThresholdIndicators[i].style.width = '100%');
+		evt.target.value === 'h' &&
+			(example7InvertedSwapThresholdIndicators[i].style.height = '100%');
+		evt.target.value === 'v' &&
+			(example7InvertedSwapThresholdIndicators[i].style.width = '100%');
 	}
 
 	for (i = 0; i < example7SwapThresholdIndicators.length; i++) {
@@ -178,24 +189,25 @@ function renderDirection(evt) {
 	}
 
 	renderThresholdWidth({
-		target: example7SwapThresholdInput
+		target: example7SwapThresholdInput,
 	});
 }
 example7DirectionInput.addEventListener('change', renderDirection);
 
 renderDirection({
-	target: example7DirectionInput
+	target: example7DirectionInput,
 });
-
 
 // Grid demo
 new Sortable(gridDemo, {
 	animation: 150,
-	ghostClass: 'blue-background-class'
+	ghostClass: 'blue-background-class',
 });
 
 // Nested demo
-var nestedSortables = [].slice.call(document.querySelectorAll('.nested-sortable'));
+var nestedSortables = [].slice.call(
+	document.querySelectorAll('.nested-sortable')
+);
 
 // Loop through each nested sortable element
 for (var i = 0; i < nestedSortables.length; i++) {
@@ -203,7 +215,7 @@ for (var i = 0; i < nestedSortables.length; i++) {
 		group: 'nested',
 		animation: 150,
 		fallbackOnBody: true,
-		swapThreshold: 0.65
+		swapThreshold: 0.65,
 	});
 }
 
@@ -212,13 +224,12 @@ new Sortable(multiDragDemo, {
 	multiDrag: true,
 	selectedClass: 'selected',
 	fallbackTolerance: 3, // So that we can select items on mobile
-	animation: 150
+	animation: 150,
 });
-
 
 // Swap demo
 new Sortable(swapDemo, {
 	swap: true,
 	swapClass: 'highlight',
-	animation: 150
+	animation: 150,
 });

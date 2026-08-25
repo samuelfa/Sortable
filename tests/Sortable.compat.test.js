@@ -1,39 +1,49 @@
-import { Selector } from 'testcafe';
+import { test, expect, dragAndDrop } from './fixtures.js';
 
+test.describe('Simple Sorting', () => {
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/tests/single-list.html');
+	});
 
-fixture `Simple Sorting`
-	.page `./single-list.html`;
+	test('Sort down list', async ({ page }) => {
+		const list1 = page.locator('#list1');
 
-let list1 = Selector('#list1');
+		const dragStartPosition = list1.locator('> *').nth(0);
+		const targetStartPosition = list1.locator('> *').nth(2);
 
-test('Sort down list', async browser => {
-	const dragStartPosition = list1.child(0);
-	const dragEl = await dragStartPosition();
-	const dragEndPosition = list1.child(2);
-	const targetStartPosition = list1.child(2);
-	const target = await targetStartPosition();
-	const targetEndPosition = list1.child(1);
+		// Get initial text values
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
 
-	await browser
-		.expect(dragStartPosition.innerText).eql(dragEl.innerText)
-		.expect(targetStartPosition.innerText).eql(target.innerText)
-		.dragToElement(dragEl, target)
-		.expect(dragEndPosition.innerText).eql(dragEl.innerText)
-		.expect(targetEndPosition.innerText).eql(target.innerText);
-});
+		// Drag first item to third position
+		await dragAndDrop(page, dragStartPosition, targetStartPosition);
 
-test('Sort up list', async browser => {
-	const dragStartPosition = list1.child(2);
-	const dragEl = await dragStartPosition();
-	const dragEndPosition = list1.child(0);
-	const targetStartPosition = list1.child(0);
-	const target = await targetStartPosition();
-	const targetEndPosition = list1.child(1);
+		// Verify positions updated
+		const dragEndPosition = list1.locator('> *').nth(2);
+		const targetEndPosition = list1.locator('> *').nth(1);
 
-	await browser
-		.expect(dragStartPosition.innerText).eql(dragEl.innerText)
-		.expect(targetStartPosition.innerText).eql(target.innerText)
-		.dragToElement(dragEl, target)
-		.expect(dragEndPosition.innerText).eql(dragEl.innerText)
-		.expect(targetEndPosition.innerText).eql(target.innerText);
+		await expect(dragEndPosition).toHaveText(dragText);
+		await expect(targetEndPosition).toHaveText(targetText);
+	});
+
+	test('Sort up list', async ({ page }) => {
+		const list1 = page.locator('#list1');
+
+		const dragStartPosition = list1.locator('> *').nth(2);
+		const targetStartPosition = list1.locator('> *').nth(0);
+
+		// Get initial text values
+		const dragText = await dragStartPosition.innerText();
+		const targetText = await targetStartPosition.innerText();
+
+		// Drag third item to first position
+		await dragAndDrop(page, dragStartPosition, targetStartPosition);
+
+		// Verify positions updated
+		const dragEndPosition = list1.locator('> *').nth(0);
+		const targetEndPosition = list1.locator('> *').nth(1);
+
+		await expect(dragEndPosition).toHaveText(dragText);
+		await expect(targetEndPosition).toHaveText(targetText);
+	});
 });

@@ -1,4 +1,5 @@
-module.exports = function(api) {
+export default function (api) {
+	/* Cache the configuration based on NODE_ENV */
 	api.cache(true);
 
 	let presets;
@@ -6,22 +7,18 @@ module.exports = function(api) {
 	if (process.env.NODE_ENV === 'es') {
 		presets = [
 			[
-				"@babel/preset-env",
+				'@babel/preset-env',
 				{
-					"modules": false
-				}
-			]
+					modules: false,
+				},
+			],
 		];
 	} else if (process.env.NODE_ENV === 'umd') {
-		presets = [
-			[
-				"@babel/preset-env"
-			]
-		];
+		presets = [['@babel/preset-env']];
 	}
 
 	return {
 		plugins: ['@babel/plugin-transform-object-assign'],
-		presets
+		presets,
 	};
-};
+}

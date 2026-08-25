@@ -1,13 +1,14 @@
+/* Ensures fixed, deterministic dimensions across operating systems to prevent calculation rounding errors in CI tests */
 .list > div {
-	min-height: 50px;
+	box-sizing: border-box;
+	height: 54px;
 	border-style: solid;
 	border-width: 2px;
 	text-align: center;
-	line-height: 50px;
+	line-height: 46px;
 	font-size: 20px;
-	font-family: Helvetica;
+	font-family: Helvetica, Arial, sans-serif;
 }
-
 
 .half {
 	display: inline-block;

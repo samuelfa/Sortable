@@ -11,11 +11,12 @@ export default function AnimationStateManager() {
 			if (!this.options.animation) return;
 			let children = [].slice.call(this.el.children);
 
-			children.forEach(child => {
-				if (css(child, 'display') === 'none' || child === Sortable.ghost) return;
+			children.forEach((child) => {
+				if (css(child, 'display') === 'none' || child === Sortable.ghost)
+					return;
 				animationStates.push({
 					target: child,
-					rect: getRect(child)
+					rect: getRect(child),
 				});
 				let fromRect = { ...animationStates[animationStates.length - 1].rect };
 
@@ -43,7 +44,7 @@ export default function AnimationStateManager() {
 		animateAll(callback) {
 			if (!this.options.animation) {
 				clearTimeout(animationCallbackId);
-				if (typeof(callback) === 'function') callback();
+				if (typeof callback === 'function') callback();
 				return;
 			}
 
@@ -61,7 +62,6 @@ export default function AnimationStateManager() {
 					animatingRect = state.rect,
 					targetMatrix = matrix(target, true);
 
-
 				if (targetMatrix) {
 					// Compensate for current animation
 					toRect.top -= targetMatrix.f;
@@ -77,12 +77,16 @@ export default function AnimationStateManager() {
 						!isRectEqual(fromRect, toRect) &&
 						// Make sure animatingRect is on line between toRect & fromRect
 						(animatingRect.top - toRect.top) /
-						(animatingRect.left - toRect.left) ===
-						(fromRect.top - toRect.top) /
-						(fromRect.left - toRect.left)
+							(animatingRect.left - toRect.left) ===
+							(fromRect.top - toRect.top) / (fromRect.left - toRect.left)
 					) {
 						// If returning to same place as started from animation and on same axis
-						time = calculateRealTime(animatingRect, prevFromRect, prevToRect, this.options);
+						time = calculateRealTime(
+							animatingRect,
+							prevFromRect,
+							prevToRect,
+							this.options
+						);
 					}
 				}
 
@@ -94,19 +98,14 @@ export default function AnimationStateManager() {
 					if (!time) {
 						time = this.options.animation;
 					}
-					this.animate(
-						target,
-						animatingRect,
-						toRect,
-						time
-					);
+					this.animate(target, animatingRect, toRect, time);
 				}
 
 				if (time) {
 					animating = true;
 					animationTime = Math.max(animationTime, time);
 					clearTimeout(target.animationResetTimer);
-					target.animationResetTimer = setTimeout(function() {
+					target.animationResetTimer = setTimeout(function () {
 						target.animationTime = 0;
 						target.prevFromRect = null;
 						target.fromRect = null;
@@ -117,13 +116,12 @@ export default function AnimationStateManager() {
 				}
 			});
 
-
 			clearTimeout(animationCallbackId);
 			if (!animating) {
-				if (typeof(callback) === 'function') callback();
+				if (typeof callback === 'function') callback();
 			} else {
-				animationCallbackId = setTimeout(function() {
-					if (typeof(callback) === 'function') callback();
+				animationCallbackId = setTimeout(function () {
+					if (typeof callback === 'function') callback();
 				}, animationTime);
 			}
 			animationStates = [];
@@ -142,13 +140,24 @@ export default function AnimationStateManager() {
 				target.animatingX = !!translateX;
 				target.animatingY = !!translateY;
 
-				css(target, 'transform', 'translate3d(' + translateX + 'px,' + translateY + 'px,0)');
+				css(
+					target,
+					'transform',
+					'translate3d(' + translateX + 'px,' + translateY + 'px,0)'
+				);
 
 				this.forRepaintDummy = repaint(target); // repaint
 
-				css(target, 'transition', 'transform ' + duration + 'ms' + (this.options.easing ? ' ' + this.options.easing : ''));
+				css(
+					target,
+					'transition',
+					'transform ' +
+						duration +
+						'ms' +
+						(this.options.easing ? ' ' + this.options.easing : '')
+				);
 				css(target, 'transform', 'translate3d(0,0,0)');
-				(typeof target.animated === 'number') && clearTimeout(target.animated);
+				typeof target.animated === 'number' && clearTimeout(target.animated);
 				target.animated = setTimeout(function () {
 					css(target, 'transition', '');
 					css(target, 'transform', '');
@@ -158,7 +167,7 @@ export default function AnimationStateManager() {
 					target.animatingY = false;
 				}, duration);
 			}
-		}
+		},
 	};
 }
 
@@ -166,10 +175,16 @@ function repaint(target) {
 	return target.offsetWidth;
 }
 
-
 function calculateRealTime(animatingRect, fromRect, toRect, options) {
 	return (
-		Math.sqrt(Math.pow(fromRect.top - animatingRect.top, 2) + Math.pow(fromRect.left - animatingRect.left, 2)) /
-		Math.sqrt(Math.pow(fromRect.top - toRect.top, 2) + Math.pow(fromRect.left - toRect.left, 2))
-	) * options.animation;
+		(Math.sqrt(
+			Math.pow(fromRect.top - animatingRect.top, 2) +
+				Math.pow(fromRect.left - animatingRect.left, 2)
+		) /
+			Math.sqrt(
+				Math.pow(fromRect.top - toRect.top, 2) +
+					Math.pow(fromRect.left - toRect.left, 2)
+			)) *
+		options.animation
+	);
 }
