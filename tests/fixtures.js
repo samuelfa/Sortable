@@ -1,5 +1,60 @@
 import { test as base, expect } from '@playwright/test';
 
+/**
+ * Drag-and-drop via raw mouse events.
+ *
+ * locator.dragTo() performs a single-step move that is unreliable here.
+ * On desktop Chromium, Sortable sets dragEl.draggable = true on mousedown and
+ * drives the drag through the browser's native HTML5 DnD loop, so a single
+ * precise move must be used (extra intermediate events cross swap zones).
+ * Mobile emulation never fires dragstart, so Sortable falls back to pointer
+ * events, which need several move steps and a beat of settling to engage.
+ */
+function dragProfile() {
+	const isMobile = test.info().project.name === 'mobile-touch';
+	return {
+		steps: isMobile ? 1 : 1,
+		afterDown: isMobile ? 60 : 0,
+		beforeUp: isMobile ? 120 : 0,
+		isMobile,
+	};
+}
+
+export async function dragAndDrop(
+	page,
+	source,
+	target,
+	{
+		sourcePosition = { x: 0.5, y: 0.5 },
+		targetPosition = { x: 0.5, y: 0.5 },
+	} = {}
+) {
+	const { steps, afterDown, beforeUp, isMobile } = dragProfile();
+	const sourceBox = await source.boundingBox();
+	const targetBox = await target.boundingBox();
+	const startX = sourceBox.x + sourceBox.width * sourcePosition.x;
+	const startY = sourceBox.y + sourceBox.height * sourcePosition.y;
+
+	await page.mouse.move(startX, startY);
+	await page.mouse.down();
+	if (afterDown) await page.waitForTimeout(afterDown);
+	if (isMobile) {
+		// Tiny nudge that stays inside the source item: engages Sortable's
+		// pointer fallback without hovering any other swap zone.
+		await page.mouse.move(startX + 3, startY);
+		await page.waitForTimeout(80);
+	}
+	await page.mouse.move(
+		targetBox.x + targetBox.width * targetPosition.x,
+		targetBox.y + targetBox.height * targetPosition.y,
+		{
+			steps,
+		}
+	);
+	if (beforeUp) await page.waitForTimeout(beforeUp);
+	await page.mouse.up();
+}
+
 export const test = base.extend({
 	page: async ({ page }, use, testInfo) => {
 		const logs = [];

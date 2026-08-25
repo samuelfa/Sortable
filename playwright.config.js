@@ -22,7 +22,8 @@ export default defineConfig({
 
 	use: {
 		headless: true,
-		viewport: { width: 1280, height: 720 },
+		/* Tall enough for the nested test page to fit without scrolling */
+		viewport: { width: 1280, height: 1000 },
 		/* Base URL for the local testing server */
 		baseURL: 'http://localhost:8080',
 
@@ -58,8 +59,11 @@ export default defineConfig({
 		},
 		{
 			name: 'mobile-touch',
-			use: { ...devices['Pixel 5'] }, // Emula pantalla táctil y eventos touch reales
-			hasTouch: true,
+			use: {
+				...devices['Pixel 5'], // Emula pantalla táctil y eventos touch reales
+				hasTouch: true,
+				viewport: { width: 393, height: 1400 },
+			},
 		},
 	],
 });

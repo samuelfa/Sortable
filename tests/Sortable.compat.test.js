@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures.js';
+import { test, expect, dragAndDrop } from './fixtures.js';
 
 test.describe('Simple Sorting', () => {
 	test.beforeEach(async ({ page }) => {
@@ -16,7 +16,7 @@ test.describe('Simple Sorting', () => {
 		const targetText = await targetStartPosition.innerText();
 
 		// Drag first item to third position
-		await dragStartPosition.dragTo(targetStartPosition);
+		await dragAndDrop(page, dragStartPosition, targetStartPosition);
 
 		// Verify positions updated
 		const dragEndPosition = list1.locator('> *').nth(2);
@@ -37,7 +37,7 @@ test.describe('Simple Sorting', () => {
 		const targetText = await targetStartPosition.innerText();
 
 		// Drag third item to first position
-		await dragStartPosition.dragTo(targetStartPosition);
+		await dragAndDrop(page, dragStartPosition, targetStartPosition);
 
 		// Verify positions updated
 		const dragEndPosition = list1.locator('> *').nth(0);
