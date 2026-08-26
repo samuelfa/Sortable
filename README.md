@@ -4,6 +4,8 @@ Sortable is a JavaScript library for reorderable drag-and-drop lists.
 
 Demo: http://sortablejs.github.io/Sortable/
 
+**Continuous Integration:** Tests run on GitHub Actions with Playwright across Chrome, Firefox, WebKit, and mobile emulation. [View CI status](https://github.com/SortableJS/Sortable/actions).
+
 ## Features
 
 - Supports touch devices and [modern](http://caniuse.com/#search=drag) browsers (including IE9)

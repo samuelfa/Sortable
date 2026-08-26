@@ -32,3 +32,10 @@
 
 - Run `npm run build` to build everything and minify
 - Do not commit the resulting builds in any pull request – they will be generated at release
+
+---
+
+### CI & Node Version
+
+This project uses **Node.js 24** (see `.nvmrc`) and GitHub Actions for CI.
+The CI pipeline runs linting/formatting on all PRs, and the full Playwright test suite on code changes (skipped for documentation-only changes).
