@@ -13,14 +13,29 @@
 1.  Only request to merge with the [master](https://github.com/SortableJS/Sortable/tree/master/)-branch.
 2.  Only modify source files, **do not commit the resulting build**
 
+---
+
 ### Setup
 
 1.  Fork the repo on [github](https://github.com)
 2.  Clone locally
 3.  Run `npm i` in the local repo
 
+### Development
+
+- Run `npm run build:umd:watch` for development builds
+- Run `npm run test` to execute the test suite (Playwright)
+- Run `npm run lint` to check code style
+- Run `npm run format:check` to verify formatting
+
 ### Building
 
-- For development, build the `./Sortable.js` file using the command `npm run build:umd:watch`
-- To build everything and minify it, run `npm run build`
+- Run `npm run build` to build everything and minify
 - Do not commit the resulting builds in any pull request – they will be generated at release
+
+---
+
+### CI & Node Version
+
+This project uses **Node.js 24** (see `.nvmrc`) and GitHub Actions for CI.
+The CI pipeline runs linting/formatting on all PRs, and the full Playwright test suite on code changes (skipped for documentation-only changes).
