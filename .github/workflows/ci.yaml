@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - '**'
-    paths-ignore:
-      - '**/*.md'
-      - 'CHANGELOG*'
-      - 'LICENSE*'
 
 # Cancel in-progress runs when a new commit is pushed to the same branch or PR
 concurrency:
@@ -54,7 +50,7 @@ jobs:
         run: npm ci
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}

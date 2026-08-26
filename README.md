@@ -1,10 +1,10 @@
-# Sortable &nbsp; [![Financial Contributors on Open Collective](https://opencollective.com/Sortable/all/badge.svg?label=financial+contributors)](https://opencollective.com/Sortable) [![CI](https://github.com/SortableJS/Sortable/workflows/CI/badge.svg)](https://github.com/SortableJS/Sortable/actions) [![DeepScan grade](https://deepscan.io/api/teams/3901/projects/5666/branches/43977/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=3901&pid=5666&bid=43977) [![](https://data.jsdelivr.com/v1/package/npm/sortablejs/badge)](https://www.jsdelivr.com/package/npm/sortablejs) [![npm](https://img.shields.io/npm/v/sortablejs.svg)](https://www.npmjs.com/package/sortablejs)
+# Sortable &nbsp; [![Financial Contributors on Open Collective](https://opencollective.com/Sortable/all/badge.svg?label=financial+contributors)](https://opencollective.com/Sortable) [![CI](https://github.com/samuelfa/Sortable/actions/workflows/ci.yaml/badge.svg)](https://github.com/samuelfa/Sortable/actions/workflows/ci.yaml) [![DeepScan grade](https://deepscan.io/api/teams/3901/projects/5666/branches/43977/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=3901&pid=5666&bid=43977) [![](https://data.jsdelivr.com/v1/package/npm/sortablejs/badge)](https://www.jsdelivr.com/package/npm/sortablejs) [![npm](https://img.shields.io/npm/v/sortablejs.svg)](https://www.npmjs.com/package/sortablejs)
 
 Sortable is a JavaScript library for reorderable drag-and-drop lists.
 
 Demo: http://sortablejs.github.io/Sortable/
 
-**Continuous Integration:** Tests run on GitHub Actions with Playwright across Chrome, Firefox, WebKit, and mobile emulation. [View CI status](https://github.com/SortableJS/Sortable/actions).
+**Continuous Integration:** Tests run on GitHub Actions with Playwright across Chrome, Firefox, WebKit, and mobile emulation. [View CI status](https://github.com/samuelfa/Sortable/actions/workflows/ci.yaml).
 
 ## Features
 
