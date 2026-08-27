@@ -20,6 +20,9 @@
 1.  Fork the repo on [github](https://github.com)
 2.  Clone locally
 3.  Run `npm i` in the local repo
+4.  Run `./setup.sh` for full environment (installs Playwright browsers, OS deps)
+
+---
 
 ### Development
 
@@ -27,6 +30,10 @@
 - Run `npm run test` to execute the test suite (Playwright)
 - Run `npm run lint` to check code style
 - Run `npm run format:check` to verify formatting
+- Run `npm run format:write` to auto-format code
+- Run `npx knip` to detect unused code/dependencies
+
+---
 
 ### Building
 
@@ -38,4 +45,12 @@
 ### CI & Node Version
 
 This project uses **Node.js 24** (see `.nvmrc`) and GitHub Actions for CI.
-The CI pipeline runs linting/formatting on all PRs, and the full Playwright test suite on code changes (skipped for documentation-only changes).
+
+**CI Pipeline:**
+
+- **Lint** - runs on all PRs (ESLint + Prettier)
+- **Test** - runs on code changes only (skipped for docs-only changes)
+- **Security Audit** - runs on package.json/package-lock.json changes (`npm audit`)
+- **Knip** - runs on source/package changes (unused code detection)
+
+See [docs/ci.md](docs/ci.md) for detailed workflow documentation.
