@@ -30,36 +30,4 @@ jobs:
         run: npm ci
 
       - name: Run npm audit
-        run: npm audit --audit-level=high
-
-      - name: Generate audit report for artifact
-        if: always()
-        run: npm audit --audit-level=high --json > npm-audit-report.json || true
-
-      - name: Upload audit report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: npm-audit-report
-          path: npm-audit-report.json
-          retention-days: 7
-
-      - name: Audit summary
-        if: always()
-        run: |
-          if [ -f npm-audit-report.json ]; then
-            echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
-            VULN_COUNT=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.total // 0')
-            CRITICAL=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
-            HIGH=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.high // 0')
-            MODERATE=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.moderate // 0')
-            LOW=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.low // 0')
-            echo "- **Total vulnerabilities:** $VULN_COUNT" >> $GITHUB_STEP_SUMMARY
-            echo "- **Critical:** $CRITICAL" >> $GITHUB_STEP_SUMMARY
-            echo "- **High:** $HIGH" >> $GITHUB_STEP_SUMMARY
-            echo "- **Moderate:** $MODERATE" >> $GITHUB_STEP_SUMMARY
-            echo "- **Low:** $LOW" >> $GITHUB_STEP_SUMMARY
-            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
-              echo "⚠️ **Critical/High vulnerabilities found!**" >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
+        run: npm audit
