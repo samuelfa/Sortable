@@ -1,0 +1,43 @@
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+    labels:
+      - 'dependencies'
+      - 'automated'
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      development-dependencies:
+        patterns:
+          - '*'
+        dependency-type: 'development'
+      babel:
+        patterns:
+          - '@babel/*'
+        dependency-type: 'development'
+      rollup:
+        patterns:
+          - '@rollup/*'
+          - 'rollup'
+        dependency-type: 'development'
+    allow:
+      - dependency-type: 'development'
+        update-type: 'version-update:semver-patch'
+      - dependency-type: 'development'
+        update-type: 'version-update:semver-minor'
+    ignore:
+      - dependency-name: '@babel/core'
+        update-type: 'version-update:semver-major'
+      - dependency-name: '@babel/preset-env'
+        update-type: 'version-update:semver-major'
+      - dependency-name: '@rollup/plugin-babel'
+        update-type: 'version-update:semver-major'
+      - dependency-name: 'cross-env'
+        update-type: 'version-update:semver-major'
+      - dependency-name: 'globals'
+        update-type: 'version-update:semver-major'
