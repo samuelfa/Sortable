@@ -1,0 +1,30 @@
+{
+	"$schema": "https://knip.dev/schema.json",
+	"entry": [
+		"src/Sortable.js",
+		"src/utils.js",
+		"src/Animation.js",
+		"src/BrowserInfo.js",
+		"src/EventDispatcher.js",
+		"src/PluginManager.js",
+		"plugins/AutoScroll/AutoScroll.js",
+		"plugins/AutoScroll/index.js",
+		"plugins/MultiDrag/MultiDrag.js",
+		"plugins/MultiDrag/index.js",
+		"plugins/OnSpill/OnSpill.js",
+		"plugins/OnSpill/index.js",
+		"plugins/Swap/Swap.js",
+		"plugins/Swap/index.js"
+	],
+	"project": ["src/**/*.js", "plugins/**/*.js", "tests/**/*.js", "setup.sh"],
+	"ignore": ["entry/**", "modular/**", "st/**", "dist/**", "test/**"],
+	"ignoreFiles": ["scripts/**", "rollup.config.js"],
+	"ignoreDependencies": [
+		"@babel/preset-env",
+		"@rollup/plugin-babel",
+		"@rollup/plugin-json",
+		"@rollup/plugin-node-resolve",
+		"husky",
+		"serve"
+	]
+}
