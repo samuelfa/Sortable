@@ -32,11 +32,11 @@ jobs:
       - name: Run npm audit
         run: npm audit --audit-level=high
 
-      - name: Upload audit report
+      - name: Generate audit report for artifact
         if: always()
         run: npm audit --audit-level=high --json > npm-audit-report.json || true
 
-      - name: Upload audit report artifact
+      - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v7
         with:
