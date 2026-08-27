@@ -30,11 +30,15 @@ jobs:
         run: npm ci
 
       - name: Run npm audit
-        run: npm audit --audit-level=high --json > npm-audit-report.json || true
+        run: npm audit --audit-level=high
 
       - name: Upload audit report
         if: always()
-        uses: actions/upload-artifact@v4
+        run: npm audit --audit-level=high --json > npm-audit-report.json || true
+
+      - name: Upload audit report artifact
+        if: always()
+        uses: actions/upload-artifact@v7
         with:
           name: npm-audit-report
           path: npm-audit-report.json
@@ -43,8 +47,8 @@ jobs:
       - name: Audit summary
         if: always()
         run: |
-          echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
           if [ -f npm-audit-report.json ]; then
+            echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
             VULN_COUNT=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.total // 0')
             CRITICAL=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
             HIGH=$(cat npm-audit-report.json | jq '.metadata.vulnerabilities.high // 0')
