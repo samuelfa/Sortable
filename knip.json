@@ -17,15 +17,8 @@
 		"plugins/Swap/index.js"
 	],
 	"project": ["src/**/*.js", "plugins/**/*.js", "tests/**/*.js", "setup.sh"],
-	"ignore": [
-		"entry/**",
-		"modular/**",
-		"scripts/**",
-		"st/**",
-		"dist/**",
-		"test/**",
-		"rollup.config.js"
-	],
+	"ignore": ["entry/**", "modular/**", "st/**", "dist/**", "test/**"],
+	"ignoreFiles": ["scripts/**", "rollup.config.js"],
 	"ignoreDependencies": [
 		"@babel/preset-env",
 		"@rollup/plugin-babel",
