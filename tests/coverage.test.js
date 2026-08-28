@@ -15,7 +15,8 @@ test.describe.configure({ retries: 0 });
 test.describe.serial('Code Coverage', () => {
 	let coverageData = [];
 
-	test.beforeAll(async ({ browser }) => {
+	test.beforeAll(async ({ browser, browserName }) => {
+		test.skip(browserName !== 'chromium', 'Coverage API only supported on Chromium');
 		const context = await browser.newContext();
 		const page = await context.newPage();
 
