@@ -1,0 +1,67 @@
+name: Bundle Size
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'plugins/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'rollup.config.js'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle-size:
+    name: Bundle Size
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check bundle sizes
+        run: |
+          echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size | Gzipped |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          for file in Sortable.js Sortable.min.js modular/sortable.esm.js modular/sortable.core.esm.js modular/sortable.complete.esm.js; do
+            if [ -f "$file" ]; then
+              SIZE=$(wc -c < "$file" | awk '{print $1}')
+              SIZE_KB=$(echo "scale=2; $SIZE/1024" | bc)
+              
+              gzip -c "$file" > "${file}.gz"
+              GZ_SIZE=$(wc -c < "${file}.gz" | awk '{print $1}')
+              GZ_SIZE_KB=$(echo "scale=2; $GZ_SIZE/1024" | bc)
+              
+              echo "| $file | ${SIZE_KB} KB | ${GZ_SIZE_KB} KB |" >> $GITHUB_STEP_SUMMARY
+              rm "${file}.gz"
+            fi
+          done
+
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: bundle-sizes
+          path: |
+            Sortable.js
+            Sortable.min.js
+            modular/*.js
+          retention-days: 7
