@@ -25,6 +25,8 @@
 		"@rollup/plugin-json",
 		"@rollup/plugin-node-resolve",
 		"husky",
+		"istanbul-lib-report",
+		"istanbul-reports",
 		"serve"
 	]
 }
