@@ -4,12 +4,17 @@ This document describes the Continuous Integration workflows for Sortable.
 
 ## Workflows Overview
 
-| Workflow           | Trigger                | Purpose                          |
-| ------------------ | ---------------------- | -------------------------------- |
-| **Lint**           | All PRs                | Code style & formatting          |
-| **Test**           | Code changes only      | Build & Playwright tests         |
-| **Security Audit** | Package file changes   | Dependency vulnerability scan    |
-| **Knip**           | Source/package changes | Unused code/dependency detection |
+| Workflow             | Trigger                | Purpose                          |
+| -------------------- | ---------------------- | -------------------------------- |
+| **Lint**             | All PRs                | Code style & formatting          |
+| **Test**             | Code changes only      | Build & Playwright tests         |
+| **Security Audit**   | Package file changes   | Dependency vulnerability scan    |
+| **Knip**             | Source/package changes | Unused code/dependency detection |
+| **Code Coverage**    | Weekly + manual        | JS code coverage (Chromium)      |
+| **CodeQL**           | Push/PR/weekly         | Static analysis (SAST)           |
+| **Bundle Size**      | PR on source changes   | Bundle size tracking             |
+| **Dependabot**       | Weekly schedule        | Automated dependency updates     |
+| **Dependency Check** | Weekly + manual        | Outdated dependency report       |
 
 ---
 
@@ -92,6 +97,107 @@ npx knip
 
 ---
 
+## Code Coverage Workflow (`.github/workflows/coverage.yml`)
+
+**Runs on:** Weekly (Monday 10am) + manual dispatch
+
+**Jobs:**
+
+- `coverage`: Runs coverage test on Chromium only
+
+```bash
+npm run build
+npm run test:coverage
+```
+
+**Details:**
+
+- Uses Playwright's native Coverage API (Chromium only)
+- Converts V8 coverage to Istanbul format via `v8-to-istanbul`
+- Uploads `coverage/coverage.json` as artifact (14-day retention)
+- Posts summary to GitHub Step Summary
+
+**Coverage baseline:** ~53% statements, ~58% functions
+
+---
+
+## CodeQL Workflow (`.github/workflows/codeql.yml`)
+
+**Runs on:** Push to master, PRs to master, weekly (Monday 11am)
+
+**Jobs:**
+
+- `analyze`: GitHub CodeQL static analysis
+
+**Details:**
+
+- Language: JavaScript
+- Query suite: `security-and-quality` (OWASP Top 10, CWE, etc.)
+- Free for open source
+- Results in Security tab + PR checks
+
+---
+
+## Bundle Size Workflow (`.github/workflows/bundle-size.yml`)
+
+**Runs on:** PRs modifying source, plugins, scripts, or build config
+
+**Paths watched:**
+
+- `src/**`
+- `plugins/**`
+- `scripts/**`
+- `package.json`
+- `package-lock.json`
+- `rollup.config.js`
+
+**Jobs:**
+
+- `bundle-size`: Builds and reports bundle sizes
+
+**Outputs (raw + gzipped):**
+
+- `Sortable.js` / `Sortable.min.js`
+- `modular/sortable.esm.js`
+- `modular/sortable.core.esm.js`
+- `modular/sortable.complete.esm.js`
+
+**Artifacts:** Uploaded (7-day retention)
+**Summary:** Posted to PR Step Summary
+
+---
+
+## Dependabot (`.github/dependabot.yml`)
+
+**Schedule:** Weekly Monday 9am
+
+**Groups:**
+
+- `development-dependencies` - all dev deps
+- `babel` - @babel/* packages
+- `rollup` - @rollup/*, rollup
+
+**Auto-merge:** Patch/minor updates (major ignored)
+
+---
+
+## Dependency Check Workflow (`.github/workflows/deps.yml`)
+
+**Runs on:** Weekly Monday 9am + manual dispatch
+
+**Jobs:**
+
+- `outdated`: Runs `npm outdated` + `npm-check-updates`
+
+```bash
+npm outdated
+npx npm-check-updates
+```
+
+**Summary:** Posted to GitHub Step Summary
+
+---
+
 ## Local Development
 
 ### Run all CI checks locally
@@ -110,6 +216,11 @@ npm audit
 
 # Knip (unused code detection)
 npx knip
+
+# Coverage
+npm run test:coverage
+# or
+npm run coverage  # builds + coverage
 ```
 
 ### One-shot setup

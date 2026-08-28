@@ -32,6 +32,8 @@
 - Run `npm run format:check` to verify formatting
 - Run `npm run format:write` to auto-format code
 - Run `npx knip` to detect unused code/dependencies
+- Run `npm run test:coverage` for code coverage (Chromium only)
+- Run `npm audit` for security audit
 
 ---
 
@@ -52,5 +54,10 @@ This project uses **Node.js 24** (see `.nvmrc`) and GitHub Actions for CI.
 - **Test** - runs on code changes only (skipped for docs-only changes)
 - **Security Audit** - runs on package.json/package-lock.json changes (`npm audit`)
 - **Knip** - runs on source/package changes (unused code detection)
+- **Code Coverage** - weekly + manual (Playwright JS coverage, Chromium)
+- **CodeQL** - push/PR/weekly (static analysis)
+- **Bundle Size** - PR on source changes (min/gzip sizes)
+- **Dependabot** - weekly automated PRs for dependencies
+- **Dependency Check** - weekly + manual (npm outdated + ncu)
 
 See [docs/ci.md](docs/ci.md) for detailed workflow documentation.
