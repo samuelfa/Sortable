@@ -48,16 +48,4 @@
 
 This project uses **Node.js 24** (see `.nvmrc`) and GitHub Actions for CI.
 
-**CI Pipeline:**
-
-- **Lint** - runs on all PRs (ESLint + Prettier)
-- **Test** - runs on code changes only (skipped for docs-only changes)
-- **Security Audit** - runs on package.json/package-lock.json changes (`npm audit`)
-- **Knip** - runs on source/package changes (unused code detection)
-- **Code Coverage** - weekly + manual (Playwright JS coverage, Chromium)
-- **CodeQL** - push/PR/weekly (static analysis)
-- **Bundle Size** - PR on source changes (min/gzip sizes)
-- **Dependabot** - weekly automated PRs for dependencies
-- **Dependency Check** - weekly + manual (npm outdated + ncu)
-
-See [docs/ci.md](docs/ci.md) for detailed workflow documentation.
+See [docs/ci.md](docs/ci.md) for complete CI pipeline documentation.
