@@ -21,7 +21,9 @@
 		"test:ui": "playwright test --ui",
 		"test:debug": "playwright test --debug",
 		"test:coverage": "playwright test tests/coverage.test.js --project=chromium",
-		"coverage": "npm run build && npm run test:coverage"
+		"test:coverage:full": "playwright test tests/coverage-full-suite.test.js --project=chromium",
+		"coverage": "npm run build && npm run test:coverage",
+		"coverage:full": "npm run build && npm run test:coverage:full"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.26.9",
