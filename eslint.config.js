@@ -3,7 +3,15 @@ import globals from 'globals';
 export default [
 	{
 		/* Ignore built output files and node_modules */
-		ignores: ['Sortable.js', 'Sortable.min.js', 'modular/**', 'dist/**'],
+		ignores: [
+			'Sortable.js',
+			'Sortable.min.js',
+			'modular/**',
+			'dist/**',
+			'coverage/**',
+			'.nyc_output/**',
+			'*.map',
+		],
 	},
 	{
 		languageOptions: {

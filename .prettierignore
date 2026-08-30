@@ -3,3 +3,9 @@ dist/
 build/
 playwright-report/
 test-results/
+coverage/
+.nyc_output/
+Sortable.js
+Sortable.min.js
+*.map
+modular/

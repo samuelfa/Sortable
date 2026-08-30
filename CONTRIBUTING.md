@@ -33,6 +33,7 @@
 - Run `npm run format:write` to auto-format code
 - Run `npx knip` to detect unused code/dependencies
 - Run `npm run test:coverage` for code coverage (Chromium only)
+- Run `npm run test:coverage:ci` for full suite coverage (Chromium, parallel)
 - Run `npm audit` for security audit
 
 ---

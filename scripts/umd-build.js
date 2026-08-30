@@ -10,4 +10,14 @@ export default [
 			format: 'umd',
 		},
 	},
+	{
+		...build,
+		input: 'entry/entry-complete.js',
+		output: {
+			...build.output,
+			file: './Sortable.js',
+			format: 'iife',
+			name: 'Sortable',
+		},
+	},
 ];
