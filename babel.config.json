@@ -1,0 +1,31 @@
+{
+	"presets": [["@babel/preset-env", { "targets": "defaults" }]],
+	"plugins": ["@babel/plugin-transform-object-assign"],
+	"env": {
+		"test": {
+			"plugins": [
+				[
+					"istanbul",
+					{
+						"exclude": [
+							"test/**/*",
+							"entry/**",
+							"scripts/**",
+							"node_modules/**"
+						],
+						"instrumenterConfig": {
+							"coverageGlobalScope": "window",
+							"coverageGlobalScopeFunc": false
+						}
+					}
+				]
+			]
+		},
+		"es": {
+			"presets": [["@babel/preset-env", { "modules": false }]]
+		},
+		"umd": {
+			"presets": [["@babel/preset-env", { "modules": false }]]
+		}
+	}
+}

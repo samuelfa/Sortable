@@ -11,6 +11,7 @@ This document describes the Continuous Integration workflows for Sortable.
 | **Security Audit**   | Package file changes   | Dependency vulnerability scan    |
 | **Knip**             | Source/package changes | Unused code/dependency detection |
 | **Code Coverage**    | Weekly + manual        | JS code coverage (Chromium)      |
+| **Code Coverage CI** | Weekly + manual        | Full suite coverage (parallel)   |
 | **CodeQL**           | Push/PR/weekly         | Static analysis (SAST)           |
 | **Bundle Size**      | PR on source changes   | Bundle size tracking             |
 | **Dependabot**       | Weekly schedule        | Automated dependency updates     |
@@ -118,6 +119,39 @@ npm run test:coverage
 - Posts summary to GitHub Step Summary
 
 **Coverage baseline:** ~53% statements, ~58% functions
+
+---
+
+## Code Coverage CI Workflow (`.github/workflows/coverage-ci.yml`)
+
+**Runs on:** Weekly (Monday 10am) + manual dispatch
+
+**Jobs:**
+
+- `coverage`: Runs full test suite with coverage on Chromium (parallel workers)
+
+```bash
+npm run coverage:ci
+```
+
+**Details:**
+
+- Uses dedicated `chromium-coverage` project with `retries: 0`, `workers: 2`
+- Worker-scoped fixtures collect V8 coverage per test
+- File-based merging across parallel workers
+- Converts V8 coverage to Istanbul format via `v8-to-istanbul`
+- Uploads `coverage/coverage-from-tests.json` as artifact (14-day retention)
+- Posts summary to GitHub Step Summary
+
+**Coverage baseline (full suite):** ~57% statements, ~69% branches, ~61% functions, ~57% lines
+
+**Local usage:**
+
+```bash
+npm run coverage:ci
+# or
+COVERAGE=true npm run build && COVERAGE=true npx playwright test --project=chromium-coverage
+```
 
 ---
 

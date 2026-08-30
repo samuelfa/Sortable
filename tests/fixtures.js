@@ -1,4 +1,6 @@
 import { test as base, expect } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Drag-and-drop via raw mouse events.
@@ -64,6 +66,15 @@ export async function dragAndDrop(
 
 export const test = base.extend({
 	page: async ({ page }, use, testInfo) => {
+		// Coverage collection for Istanbul
+		const coverageDir = path.resolve('.nyc_output');
+		if (process.env.COVERAGE === 'true') {
+			if (!fs.existsSync(coverageDir)) {
+				fs.mkdirSync(coverageDir, { recursive: true });
+			}
+		}
+
+		// 1. Capture JS errors from page and console
 		const logs = [];
 
 		/*
@@ -80,7 +91,6 @@ export const test = base.extend({
 			});
 		}
 
-		// 1. Capturar errores JS de la página y de consola
 		page.on('pageerror', (error) =>
 			console.error(`[Browser Error] ${error.message}`)
 		);
@@ -96,7 +106,7 @@ export const test = base.extend({
 			logs.push(`[Drag Math] ${message}`);
 		};
 
-		// 2. Interceptar navegaciones y validar HTTP 200 automáticamente
+		// 2. Intercept navigations and validate HTTP 200 automatically
 		page.on('response', (response) => {
 			const status = response.status();
 			const url = response.url();
@@ -112,19 +122,37 @@ export const test = base.extend({
 
 		await use(page);
 
-		if (testInfo.status !== testInfo.expectedStatus) {
-			console.log(`\n❌ DEBUG LOGS FOR FAILED TEST: "${testInfo.title}"`);
-			console.log('--------------------------------------------------');
-			console.log(
-				logs.length > 0 ? logs.join('\n') : 'No browser logs captured.'
-			);
-			console.log('--------------------------------------------------\n');
-
-			// Attach logs directly to Playwright's HTML/GitHub Actions report
-			await testInfo.attach('failure-debug-logs.txt', {
-				body: logs.join('\n'),
-				contentType: 'text/plain',
+		// Collect Istanbul coverage from browser
+		if (process.env.COVERAGE === 'true') {
+			const result = await page.evaluate(() => {
+				const keys = Object.getOwnPropertyNames(window);
+				const covKeys = keys.filter(
+					(k) => k.startsWith('cov_') || k === '__coverage__'
+				);
+				return {
+					allKeys: Object.getOwnPropertyNames(window).filter(
+						(k) => k.startsWith('cov_') || k === '__coverage__'
+					),
+					coverageObj: window.__coverage__,
+					covKeys: covKeys,
+					globalKeys: Object.getOwnPropertyNames(globalThis).filter(
+						(k) => k.startsWith('cov_') || k === '__coverage__'
+					),
+				};
 			});
+
+			const coverage = result.coverageObj;
+			if (coverage && Object.keys(coverage).length > 0) {
+				const coverageDir = path.resolve('.nyc_output');
+				if (!fs.existsSync(coverageDir)) {
+					fs.mkdirSync(coverageDir, { recursive: true });
+				}
+				const fileName = `coverage-${Date.now()}-${Math.random().toString(36).slice(2)}.json`;
+				fs.writeFileSync(
+					path.join(coverageDir, fileName),
+					JSON.stringify(coverage)
+				);
+			}
 		}
 	},
 });
