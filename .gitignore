@@ -6,4 +6,5 @@ jquery.fn.*
 .idea/
 temp/
 coverage/
+.nyc_output/
 test-results/
