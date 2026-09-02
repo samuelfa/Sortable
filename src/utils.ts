@@ -6,7 +6,7 @@ const captureMode = {
 	passive: false,
 };
 
-export function on(el, event, fn) {
+function on(el, event, fn) {
 	el.addEventListener(event, fn, !IE11OrLess && captureMode);
 }
 
@@ -42,7 +42,7 @@ function getParentOrHost(el) {
 		: el.parentNode;
 }
 
-export function closest(
+function closest(
 	/**HTMLElement*/ el,
 	/**String*/ selector,
 	/**HTMLElement*/ ctx,
@@ -72,7 +72,7 @@ export function closest(
 
 const R_SPACE = /\s+/g;
 
-export function toggleClass(el, name, state) {
+function toggleClass(el, name, state) {
 	if (el && name) {
 		if (el.classList) {
 			el.classList[state ? 'add' : 'remove'](name);
@@ -88,29 +88,38 @@ export function toggleClass(el, name, state) {
 	}
 }
 
-export function css(el, prop, val) {
+export function css(el: HTMLElement): CSSStyleDeclaration;
+export function css(el: HTMLElement, prop: string): string;
+export function css(el: HTMLElement, prop: string, val: string | number): string;
+export function css(el: HTMLElement, prop?: string, val?: string | number): string | CSSStyleDeclaration {
 	let style = el && el.style;
 
 	if (style) {
-		if (val === void 0) {
+		if (prop === void 0 || val === void 0) {
+			let computedStyle: CSSStyleDeclaration;
 			if (document.defaultView && document.defaultView.getComputedStyle) {
-				val = document.defaultView.getComputedStyle(el, '');
+				computedStyle = document.defaultView.getComputedStyle(el, '');
 			} else if (el.currentStyle) {
-				val = el.currentStyle;
+				computedStyle = el.currentStyle as CSSStyleDeclaration;
+			} else {
+				computedStyle = {} as CSSStyleDeclaration;
 			}
 
-			return prop === void 0 ? val : val[prop];
+			return prop === void 0 ? computedStyle : computedStyle[prop as any] as string;
 		} else {
-			if (!(prop in style) && prop.indexOf('webkit') === -1) {
-				prop = '-webkit-' + prop;
+			let propName = prop;
+			if (!(propName in style) && propName.indexOf('webkit') === -1) {
+				propName = '-webkit-' + propName;
 			}
 
-			style[prop] = val + (typeof val === 'string' ? '' : 'px');
+			style[propName as any] = (val as string) + (typeof val === 'string' ? '' : 'px');
+			return '';
 		}
 	}
+	return '';
 }
 
-export function matrix(el, selfOnly) {
+export function matrix(el: HTMLElement | Window | string, selfOnly = false): string | DOMMatrix | null {
 	let appliedTransforms = '';
 	if (typeof el === 'string') {
 		appliedTransforms = el;
@@ -134,7 +143,7 @@ export function matrix(el, selfOnly) {
 	return matrixFn && new matrixFn(appliedTransforms);
 }
 
-export export function find(ctx, tagName, iterator) {
+function find(ctx, tagName, iterator) {
 	if (ctx) {
 		let list = ctx.getElementsByTagName(tagName),
 			i = 0,
@@ -152,7 +161,7 @@ export export function find(ctx, tagName, iterator) {
 	return [];
 }
 
-export function getWindowScrollingElement() {
+function getWindowScrollingElement() {
 	let scrollingElement = document.scrollingElement;
 
 	if (scrollingElement) {
@@ -172,12 +181,12 @@ export function getWindowScrollingElement() {
  * @return {Object}                               The boundingClientRect of el, with specified adjustments
  */
 function getRect(
-	el,
-	relativeToContainingBlock,
-	relativeToNonStaticParent,
-	undoScale,
-	container
-) {
+	el: HTMLElement | Window,
+	relativeToContainingBlock = false,
+	relativeToNonStaticParent = false,
+	undoScale = false,
+	container?: HTMLElement
+): DOMRect | null {
 	if (!el.getBoundingClientRect && el !== window) return;
 
 	let elRect, top, left, bottom, right, height, width;
@@ -236,9 +245,9 @@ function getRect(
 
 	if (undoScale && el !== window) {
 		// Adjust for scale()
-		let elMatrix = matrix(container || el),
-			scaleX = elMatrix && elMatrix.a,
-			scaleY = elMatrix && elMatrix.d;
+		let elMatrix = matrix(container || el) as DOMMatrix | null;
+		let scaleX = elMatrix && elMatrix.a;
+		let scaleY = elMatrix && elMatrix.d;
 
 		if (elMatrix) {
 			top /= scaleY;
@@ -267,19 +276,20 @@ function getRect(
  * @param {HTMLElement} el
  */
 function getContentRect(el) {
-	let rect = getRect(el);
+	const rect = getRect(el);
 	const paddingLeft = parseInt(css(el, 'padding-left')),
 		paddingTop = parseInt(css(el, 'padding-top')),
 		paddingRight = parseInt(css(el, 'padding-right')),
 		paddingBottom = parseInt(css(el, 'padding-bottom'));
-	rect.top += paddingTop + parseInt(css(el, 'border-top-width'));
-	rect.left += paddingLeft + parseInt(css(el, 'border-left-width'));
-	// Client Width/Height includes padding only
-	rect.width = el.clientWidth - paddingLeft - paddingRight;
-	rect.height = el.clientHeight - paddingTop - paddingBottom;
-	rect.bottom = rect.top + rect.height;
-	rect.right = rect.left + rect.width;
-	return rect;
+	const result: DOMRectInit = {
+		top: rect.top + paddingTop + parseInt(css(el, 'border-top-width')),
+		left: rect.left + paddingLeft + parseInt(css(el, 'border-left-width')),
+		width: el.clientWidth - paddingLeft - paddingRight,
+		height: el.clientHeight - paddingTop - paddingBottom,
+		bottom: rect.top + paddingTop + parseInt(css(el, 'border-top-width')) + el.clientHeight - paddingTop - paddingBottom,
+		right: rect.left + paddingLeft + parseInt(css(el, 'border-left-width')) + el.clientWidth - paddingLeft - paddingRight,
+	};
+	return result as DOMRect;
 }
 
 /**
@@ -407,9 +417,9 @@ function getRelativeScrollOffset(el) {
 
 	if (el) {
 		do {
-			let elMatrix = matrix(el),
-				scaleX = elMatrix.a,
-				scaleY = elMatrix.d;
+			let elMatrix = matrix(el) as DOMMatrix;
+			let scaleX = elMatrix.a;
+			let scaleY = elMatrix.d;
 
 			offsetLeft += el.scrollLeft * scaleX;
 			offsetTop += el.scrollTop * scaleY;
@@ -447,7 +457,7 @@ function getParentAutoScrollElement(el, includeSelf) {
 			elem.clientWidth < elem.scrollWidth ||
 			elem.clientHeight < elem.scrollHeight
 		) {
-			let elemCSS = css(elem);
+			let elemCSS = css(elem) as CSSStyleDeclaration;
 			if (
 				(elem.clientWidth < elem.scrollWidth &&
 					(elemCSS.overflowX == 'auto' || elemCSS.overflowX == 'scroll')) ||
@@ -547,17 +557,26 @@ function unsetRect(el) {
 	css(el, 'height', '');
 }
 
-function getChildContainingRectFromElement(container, options, ghostEl) {
-	const rect = {};
+function getChildContainingRectFromElement(container: HTMLElement, options: any, ghostEl: HTMLElement | null): DOMRect {
+	const rect = {
+		left: Infinity,
+		top: Infinity,
+		right: -Infinity,
+		bottom: -Infinity,
+		width: 0,
+		height: 0,
+		x: 0,
+		y: 0,
+	};
 
-	Array.from(container.children).forEach((child) => {
+	Array.from(container.children).forEach((child: HTMLElement) => {
 		if (
 			!closest(child, options.draggable, container, false) ||
 			child.animated ||
 			child === ghostEl
 		)
 			return;
-		const childRect = getRect(child);
+		const childRect = getRect(child, false, false, false, container);
 		rect.left = Math.min(rect.left ?? Infinity, childRect.left);
 		rect.top = Math.min(rect.top ?? Infinity, childRect.top);
 		rect.right = Math.max(rect.right ?? -Infinity, childRect.right);
@@ -579,8 +598,6 @@ export {
 	getParentOrHost,
 	closest,
 	toggleClass,
-	css,
-	matrix,
 	find,
 	getWindowScrollingElement,
 	getRect,

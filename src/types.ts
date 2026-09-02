@@ -95,68 +95,84 @@ export interface DispatchEventInfo {
 	extraEventProperties?: Record<string, any>;
 }
 
-export interface HTMLElement {
-	animated?: number | boolean;
-	animatingX?: boolean;
-	animatingY?: boolean;
-	toRect?: DOMRect;
-	sortableIndex?: number;
-	expando?: any;
-	getAttribute(name: string): string | null;
-	src?: string;
-	href?: string;
-	style: CSSStyleDeclaration;
-	scrollTop: number;
-	scrollLeft: number;
-}
-
-export interface Element {
-	getAttribute(name: string): string | null;
-	animated?: number | boolean;
-	style: CSSStyleDeclaration;
-}
-
-export interface Window {
-	CSSMatrix: any;
-	MSCSSMatrix: any;
-	Polymer: any;
-	jQuery: any;
-	Zepto: any;
-	__coverage__: any;
-	__sortableTestOptions: any;
-	selection?: {
-		empty: () => void;
-	};
-}
-
-export interface Document {
-	selection?: {
-		empty: () => void;
-	};
-}
-
-export interface Event {
-	to?: HTMLElement;
-	from?: HTMLElement;
-	item?: HTMLElement;
-	clone?: HTMLElement;
+export interface DispatchEventInfo {
+	sortable: Sortable;
+	rootEl: HTMLElement;
+	name: string;
+	targetEl?: HTMLElement;
+	cloneEl?: HTMLElement;
+	toEl?: HTMLElement;
+	fromEl?: HTMLElement;
 	oldIndex?: number;
 	newIndex?: number;
 	oldDraggableIndex?: number;
 	newDraggableIndex?: number;
 	originalEvent?: Event;
-	pullMode?: string | boolean;
-	dragged?: HTMLElement;
-	draggedRect?: DOMRect;
-	related?: HTMLElement;
-	relatedRect?: DOMRect;
-	willInsertAfter?: boolean;
+	putSortable?: Sortable;
+	extraEventProperties?: Record<string, any>;
 }
 
 export type SortablePlugin = any;
 
 declare global {
+	interface HTMLElement {
+		animated?: boolean;
+		animatingX?: boolean;
+		animatingY?: boolean;
+		toRect?: DOMRect;
+		sortableIndex?: number;
+		expando?: any;
+		getAttribute(name: string): string | null;
+		src?: string;
+		href?: string;
+		style: CSSStyleDeclaration;
+		scrollTop: number;
+		scrollLeft: number;
+	}
+
+	interface Element {
+		getAttribute(name: string): string | null;
+		animated?: boolean;
+		style: CSSStyleDeclaration;
+	}
+
 	interface Window {
+		CSSMatrix: any;
+		MSCSSMatrix: any;
+		Polymer: any;
+		jQuery: any;
+		Zepto: any;
+		__coverage__: any;
+		__sortableTestOptions: any;
+		selection?: {
+			empty: () => void;
+		};
 		Sortable: SortableConstructor;
 	}
+
+	interface Document {
+		selection?: {
+			empty: () => void;
+		};
+	}
+
+	interface Event {
+		to?: HTMLElement;
+		from?: HTMLElement;
+		item?: HTMLElement;
+		clone?: HTMLElement;
+		oldIndex?: number;
+		newIndex?: number;
+		oldDraggableIndex?: number;
+		newDraggableIndex?: number;
+		originalEvent?: Event;
+		pullMode?: string | boolean;
+		dragged?: HTMLElement;
+		draggedRect?: DOMRect;
+		related?: HTMLElement;
+		relatedRect?: DOMRect;
+		willInsertAfter?: boolean;
+	}
 }
+
+export type SortablePlugin = any;

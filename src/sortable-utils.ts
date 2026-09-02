@@ -115,12 +115,12 @@ export function detectDirection(
 		firstChildCSS &&
 		parseInt(firstChildCSS.marginLeft) +
 			parseInt(firstChildCSS.marginRight) +
-			getRect(child1).width;
+			getRect(child1, false, false, false, undefined).width;
 	const secondChildWidth =
 		secondChildCSS &&
 		parseInt(secondChildCSS.marginLeft) +
 			parseInt(secondChildCSS.marginRight) +
-			getRect(child2).width;
+			getRect(child2, false, false, false, undefined).width;
 
 	if (elCSS.display === 'flex') {
 		return elCSS.flexDirection === 'column' ||
@@ -193,7 +193,7 @@ export function detectNearestEmptySortable(
 		const threshold = sortable[expando].options.emptyInsertThreshold;
 		if (!threshold || lastChild(sortable.el)) return;
 
-		const rect = getRect(sortable.el);
+		const rect = getRect(sortable.el, false, false, false, undefined);
 		const insideHorizontally =
 			x >= rect.left - threshold && x <= rect.right + threshold;
 		const insideVertically =
@@ -370,7 +370,7 @@ export function onMove(
 	evt.dragged = dragEl;
 	evt.draggedRect = dragRect;
 	evt.related = targetEl || toEl;
-	evt.relatedRect = targetRect || getRect(toEl);
+	evt.relatedRect = targetRect || getRect(toEl, false, false, false, undefined);
 	evt.willInsertAfter = willInsertAfter;
 	evt.originalEvent = originalEvent;
 
@@ -398,7 +398,8 @@ export function ghostIsFirst(
 	ghostEl: HTMLElement | null
 ): boolean {
 	const firstElRect = getRect(
-		getChild(sortable.el, 0, sortable.options, true)
+		getChild(sortable.el, 0, sortable.options, true),
+		false, false, false, undefined
 	);
 	const childContainingRect = getChildContainingRectFromElement(
 		sortable.el,
@@ -421,7 +422,8 @@ export function ghostIsLast(
 	ghostEl: HTMLElement | null
 ): boolean {
 	const lastElRect = getRect(
-		lastChild(sortable.el, sortable.options.draggable)
+		lastChild(sortable.el, sortable.options.draggable),
+		false, false, false, undefined
 	);
 	const childContainingRect = getChildContainingRectFromElement(
 		sortable.el,

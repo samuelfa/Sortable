@@ -36,7 +36,7 @@ export default function AnimationStateManager(): {
 				if (css(child, 'display') === 'none' || child === Sortable.ghost) return;
 				animationStates.push({
 					target: child,
-					rect: getRect(child),
+					rect: getRect(child, false, false, false, undefined),
 				});
 				const fromRect = { ...animationStates[animationStates.length - 1].rect };
 
@@ -76,7 +76,7 @@ export default function AnimationStateManager(): {
 				let animatingThis = false;
 				const target = state.target;
 				const fromRect = target.fromRect;
-				const toRect = getRect(target);
+				const toRect = getRect(target, false, false, false, undefined);
 				const prevFromRect = target.prevFromRect;
 				const prevToRect = target.prevToRect;
 				const animatingRect = state.rect;

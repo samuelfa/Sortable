@@ -1,9 +1,9 @@
-import build from './build.js';
+import build from './build.ts';
 
 export default [
 	{
 		...build,
-		input: 'entry/entry-complete.js',
+		input: 'entry/entry-complete.ts',
 		output: {
 			...build.output,
 			file: './Sortable.js',
@@ -12,7 +12,7 @@ export default [
 	},
 	{
 		...build,
-		input: 'entry/entry-complete.js',
+		input: 'entry/entry-complete.ts',
 		output: {
 			...build.output,
 			file: './Sortable.js',

@@ -134,7 +134,7 @@ export function onMove(
 	evt.dragged = dragEl;
 	evt.draggedRect = dragRect;
 	evt.related = targetEl || toEl;
-	evt.relatedRect = targetRect || getRect(toEl);
+	evt.relatedRect = targetRect || getRect(toEl, false, false, false, undefined);
 	evt.willInsertAfter = willInsertAfter;
 	evt.originalEvent = originalEvent;
 
@@ -162,7 +162,8 @@ export function ghostIsFirst(
 	ghostEl: HTMLElement | null
 ): boolean {
 	const firstElRect = getRect(
-		getChild(sortable.el, 0, sortable.options, true)
+		getChild(sortable.el, 0, sortable.options, true),
+		false, false, false, undefined
 	);
 	const childContainingRect = getChildContainingRectFromElement(
 		sortable.el,
@@ -185,7 +186,8 @@ export function ghostIsLast(
 	ghostEl: HTMLElement | null
 ): boolean {
 	const lastElRect = getRect(
-		lastChild(sortable.el, sortable.options.draggable)
+		lastChild(sortable.el, sortable.options.draggable),
+		false, false, false, undefined
 	);
 	const childContainingRect = getChildContainingRectFromElement(
 		sortable.el,

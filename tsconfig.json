@@ -20,7 +20,6 @@
     "types": ["node"]
   },
   "include": [
-    "types.d.ts",
     "src/**/*",
     "plugins/**/*",
     "scripts/**/*"
