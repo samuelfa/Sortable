@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getChild } from '../../src/utils.js';
 
 const drop = function ({

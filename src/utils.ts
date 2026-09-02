@@ -6,7 +6,7 @@ const captureMode = {
 	passive: false,
 };
 
-function on(el, event, fn) {
+export function on(el, event, fn) {
 	el.addEventListener(event, fn, !IE11OrLess && captureMode);
 }
 
@@ -42,7 +42,7 @@ function getParentOrHost(el) {
 		: el.parentNode;
 }
 
-function closest(
+export function closest(
 	/**HTMLElement*/ el,
 	/**String*/ selector,
 	/**HTMLElement*/ ctx,
@@ -72,7 +72,7 @@ function closest(
 
 const R_SPACE = /\s+/g;
 
-function toggleClass(el, name, state) {
+export function toggleClass(el, name, state) {
 	if (el && name) {
 		if (el.classList) {
 			el.classList[state ? 'add' : 'remove'](name);
@@ -88,7 +88,7 @@ function toggleClass(el, name, state) {
 	}
 }
 
-function css(el, prop, val) {
+export function css(el, prop, val) {
 	let style = el && el.style;
 
 	if (style) {
@@ -110,7 +110,7 @@ function css(el, prop, val) {
 	}
 }
 
-function matrix(el, selfOnly) {
+export function matrix(el, selfOnly) {
 	let appliedTransforms = '';
 	if (typeof el === 'string') {
 		appliedTransforms = el;
@@ -134,7 +134,7 @@ function matrix(el, selfOnly) {
 	return matrixFn && new matrixFn(appliedTransforms);
 }
 
-function find(ctx, tagName, iterator) {
+export export function find(ctx, tagName, iterator) {
 	if (ctx) {
 		let list = ctx.getElementsByTagName(tagName),
 			i = 0,
@@ -152,7 +152,7 @@ function find(ctx, tagName, iterator) {
 	return [];
 }
 
-function getWindowScrollingElement() {
+export function getWindowScrollingElement() {
 	let scrollingElement = document.scrollingElement;
 
 	if (scrollingElement) {

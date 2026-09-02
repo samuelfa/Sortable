@@ -23,16 +23,23 @@
 		"test:debug": "playwright test --debug",
 		"test:coverage": "BABEL_ENV=test COVERAGE=true npx playwright test --project=chromium --project=firefox --project=webkit",
 		"coverage": "npm run build:coverage && npm run test:coverage && npx nyc report --reporter=text --reporter=html --reporter=lcov",
-		"coverage:ci": "npm run coverage"
+		"coverage:ci": "npm run coverage",
+		"typecheck": "tsc --noEmit --skipLibCheck"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.26.9",
+		"@babel/plugin-syntax-import-attributes": "^7.29.7",
+		"@babel/plugin-syntax-import-meta": "^7.10.4",
 		"@babel/plugin-transform-object-assign": "^7.29.7",
+		"@babel/plugin-transform-typescript": "^8.0.1",
 		"@babel/preset-env": "^7.26.9",
+		"@babel/preset-typescript": "^8.0.1",
 		"@playwright/test": "^1.62.1",
 		"@rollup/plugin-babel": "^6.0.4",
 		"@rollup/plugin-json": "^6.1.0",
 		"@rollup/plugin-node-resolve": "^16.0.3",
+		"@rollup/plugin-typescript": "^12.3.0",
+		"@types/node": "^22.20.1",
 		"babel-plugin-istanbul": "^7.0.1",
 		"cross-env": "^10.1.0",
 		"eslint": "^10.9.1",
@@ -43,6 +50,7 @@
 		"prettier": "^3.9.6",
 		"rollup": "^4.63.0",
 		"serve": "^14.2.6",
+		"typescript": "^5.9.3",
 		"uglify-js": "^3.19.3"
 	},
 	"nyc": {
@@ -97,5 +105,8 @@
 		"vue",
 		"mixin"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"dependencies": {
+		"tslib": "^2.8.1"
+	}
 }

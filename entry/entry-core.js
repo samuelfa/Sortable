@@ -1,8 +1,8 @@
-import Sortable from '../src/Sortable.js';
-import AutoScroll from '../plugins/AutoScroll';
-import OnSpill from '../plugins/OnSpill';
-import Swap from '../plugins/Swap';
-import MultiDrag from '../plugins/MultiDrag';
+import Sortable from '../src/Sortable.ts';
+import AutoScroll from '../plugins/AutoScroll/AutoScroll.ts';
+import OnSpill from '../plugins/OnSpill/OnSpill.ts';
+import Swap from '../plugins/Swap/Swap.ts';
+import MultiDrag from '../plugins/MultiDrag/MultiDrag.ts';
 
 export default Sortable;
 

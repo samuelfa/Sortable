@@ -1,6 +1,7 @@
 import { babel } from '@rollup/plugin-babel';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
 import banner from './banner.js';
 
 const isCoverage = process.env.COVERAGE === 'true';
@@ -15,10 +16,12 @@ export default {
 	},
 	plugins: [
 		json(),
+		typescript({ tsconfig: './tsconfig.json' }),
+		resolve({ extensions: ['.ts'] }),
 		babel({
 			babelHelpers: 'bundled',
 			exclude: 'node_modules/**',
+			plugins: ['@babel/plugin-transform-object-assign'],
 		}),
-		resolve(),
 	],
 };
