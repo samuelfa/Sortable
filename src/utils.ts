@@ -184,9 +184,9 @@ function getWindowScrollingElement() {
  */
 function getRect(
 	el: HTMLElement | Window,
-	relativeToContainingBlock = false,
-	relativeToNonStaticParent = false,
-	undoScale = false,
+	relativeToContainingBlock?: boolean,
+	relativeToNonStaticParent?: boolean,
+	undoScale?: boolean,
 	container?: HTMLElement
 ): DOMRect | null {
 	const targetEl = el as any;

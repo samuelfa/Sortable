@@ -101,12 +101,15 @@ function matrix(el, selfOnly = false) {
     if (typeof el === 'string') {
         appliedTransforms = el;
     } else {
-        do {
-            let transform = css(el, 'transform');
+        let curr = el instanceof HTMLElement ? el : null;
+        while(curr){
+            let transform = css(curr, 'transform');
             if (transform && transform !== 'none') {
                 appliedTransforms = transform + ' ' + appliedTransforms;
             }
-        /* jshint boss:true */ }while (!selfOnly && (el = el.parentNode))
+            if (selfOnly) break;
+            curr = curr.parentNode;
+        }
     }
     const matrixFn = window.DOMMatrix || window.WebKitCSSMatrix || window.CSSMatrix || window.MSCSSMatrix;
     /*jshint -W056 */ return matrixFn && new matrixFn(appliedTransforms);
@@ -127,11 +130,12 @@ function getWindowScrollingElement() {
  * @param  {[Boolean]} undoScale                  Whether the container's scale() should be undone
  * @param  {[HTMLElement]} container              The parent the element will be placed in
  * @return {Object}                               The boundingClientRect of el, with specified adjustments
- */ function getRect(el, relativeToContainingBlock = false, relativeToNonStaticParent = false, undoScale = false, container) {
-    if (!el.getBoundingClientRect && el !== window) return;
+ */ function getRect(el, relativeToContainingBlock, relativeToNonStaticParent, undoScale, container) {
+    const targetEl = el;
+    if (!targetEl.getBoundingClientRect && el !== window) return null;
     let elRect, top, left, bottom, right, height, width;
-    if (el !== window && el.parentNode && el !== getWindowScrollingElement()) {
-        elRect = el.getBoundingClientRect();
+    if (el !== window && targetEl.parentNode && el !== getWindowScrollingElement()) {
+        elRect = targetEl.getBoundingClientRect();
         top = elRect.top;
         left = elRect.left;
         bottom = elRect.bottom;
@@ -148,26 +152,26 @@ function getWindowScrollingElement() {
     }
     if ((relativeToContainingBlock || relativeToNonStaticParent) && el !== window) {
         // Adjust for translate()
-        container = container || el.parentNode;
+        let curContainer = targetEl.parentNode;
         // solves #1123 (see: https://stackoverflow.com/a/37953806/6088312)
         // Not needed on <= IE11
         if (!IE11OrLess) {
             do {
-                if (container && container.getBoundingClientRect && (css(container, 'transform') !== 'none' || relativeToNonStaticParent && css(container, 'position') !== 'static')) {
-                    let containerRect = container.getBoundingClientRect();
+                if (curContainer && curContainer.getBoundingClientRect && (css(curContainer, 'transform') !== 'none' || relativeToNonStaticParent && css(curContainer, 'position') !== 'static')) {
+                    let containerRect = curContainer.getBoundingClientRect();
                     // Set relative to edges of padding box of container
-                    top -= containerRect.top + parseInt(css(container, 'border-top-width'));
-                    left -= containerRect.left + parseInt(css(container, 'border-left-width'));
-                    bottom = top + elRect.height;
-                    right = left + elRect.width;
+                    top -= containerRect.top + parseInt(css(curContainer, 'border-top-width'));
+                    left -= containerRect.left + parseInt(css(curContainer, 'border-left-width'));
+                    bottom = top + (elRect ? elRect.height : height);
+                    right = left + (elRect ? elRect.width : width);
                     break;
                 }
-            /* jshint boss:true */ }while (container = container.parentNode)
+            /* jshint boss:true */ }while (curContainer = curContainer.parentNode)
         }
     }
     if (undoScale && el !== window) {
         // Adjust for scale()
-        let elMatrix = matrix(container || el);
+        let elMatrix = matrix(targetEl);
         let scaleX = elMatrix && elMatrix.a;
         let scaleY = elMatrix && elMatrix.d;
         if (elMatrix) {
@@ -185,7 +189,12 @@ function getWindowScrollingElement() {
         bottom: bottom,
         right: right,
         width: width,
-        height: height
+        height: height,
+        x: left,
+        y: top,
+        toJSON () {
+            return this;
+        }
     };
 }
 /**
@@ -195,10 +204,10 @@ function getWindowScrollingElement() {
  * @param  {Number} childNum      The index of the child
  * @param  {Object} options       Parent Sortable's options
  * @return {HTMLElement}          The child at index childNum, or null if not found
- */ function getChild(el, childNum, options, includeDragEl) {
-    let currentChild = 0, i = 0, children = el.children;
-    while(i < children.length){
-        if (children[i].style.display !== 'none' && children[i] !== SortableCtor.ghost && (children[i] !== SortableCtor.dragged) && closest(children[i], options.draggable, el, false)) {
+ */ function getChild(el, childNum = 0, options = {}, includeDragEl = false) {
+    let currentChild = 0, i = 0, children = el ? el.children : [];
+    while(children && i < children.length){
+        if (children[i].style.display !== 'none' && children[i] !== SortableCtor.ghost && (includeDragEl || children[i] !== SortableCtor.dragged) && closest(children[i], options.draggable, el, false)) {
             if (currentChild === childNum) {
                 return children[i];
             }
@@ -312,6 +321,11 @@ function unsetRect(el) {
 }
 const expando = 'Sortable' + new Date().getTime();
 
+let ghostEl = null;
+function getGhostEl() {
+    return ghostEl;
+}
+
 function AnimationStateManager() {
     let animationStates = [];
     let animationCallbackId = null;
@@ -321,10 +335,10 @@ function AnimationStateManager() {
             if (!this.options?.animation) return;
             const children = Array.from(this.el.children);
             children.forEach((child)=>{
-                if (css(child, 'display') === 'none' || child === Sortable.ghost) return;
+                if (css(child, 'display') === 'none' || child === getGhostEl()) return;
                 animationStates.push({
                     target: child,
-                    rect: getRect(child, false, false, false, undefined)
+                    rect: getRect(child, false, false, false)
                 });
                 const fromRect = {
                     ...animationStates[animationStates.length - 1].rect
@@ -360,12 +374,15 @@ function AnimationStateManager() {
                 let time = 0;
                 const target = state.target;
                 const fromRect = target.fromRect;
-                const toRect = getRect(target, false, false, false, undefined);
+                const baseToRect = getRect(target, false, false, false);
+                let toRect = baseToRect ? {
+                    ...baseToRect
+                } : null;
                 const prevFromRect = target.prevFromRect;
                 const prevToRect = target.prevToRect;
                 const animatingRect = state.rect;
                 const targetMatrix = matrix(target, true);
-                if (targetMatrix) {
+                if (targetMatrix && toRect) {
                     toRect.top -= targetMatrix.f;
                     toRect.left -= targetMatrix.e;
                 }
@@ -560,10 +577,10 @@ function dispatchEvent(info) {
     }
 }
 
-const documentExists$1 = typeof document !== 'undefined';
-documentExists$1 && !ChromeForAndroid && !IOS && 'draggable' in document.createElement('div');
+const documentExists = typeof document !== 'undefined';
+documentExists && !ChromeForAndroid && !IOS && 'draggable' in document.createElement('div');
 (()=>{
-    if (!documentExists$1) return false;
+    if (!documentExists) return false;
     if (IE11OrLess) return false;
     const el = document.createElement('x');
     el.style.cssText = 'pointer-events:auto';
@@ -578,8 +595,8 @@ function detectDirection(el, options) {
     const child2 = getChild(el, 1, options);
     const firstChildCSS = child1 && css(child1);
     const secondChildCSS = child2 && css(child2);
-    const firstChildWidth = firstChildCSS && parseInt(firstChildCSS.marginLeft) + parseInt(firstChildCSS.marginRight) + getRect(child1, false, false, false, undefined).width;
-    const secondChildWidth = secondChildCSS && parseInt(secondChildCSS.marginLeft) + parseInt(secondChildCSS.marginRight) + getRect(child2, false, false, false, undefined).width;
+    const firstChildWidth = firstChildCSS && parseInt(firstChildCSS.marginLeft) + parseInt(firstChildCSS.marginRight) + getRect(child1, false, false, false).width;
+    const secondChildWidth = secondChildCSS && parseInt(secondChildCSS.marginLeft) + parseInt(secondChildCSS.marginRight) + getRect(child2, false, false, false).width;
     if (elCSS.display === 'flex') {
         return elCSS.flexDirection === 'column' || elCSS.flexDirection === 'column-reverse' ? 'vertical' : 'horizontal';
     }
@@ -595,7 +612,7 @@ function detectDirection(el, options) {
 }
 function prepareGroup(options) {
     function toFn(value, pull) {
-        return function(to, from, dragEl, evt1) {
+        return function(to, from, dragEl, evt) {
             const sameGroup = to.options.group.name && from.options.group.name && to.options.group.name === from.options.group.name;
             if (value == null && (pull || sameGroup)) {
                 return true;
@@ -604,7 +621,7 @@ function prepareGroup(options) {
             } else if (pull && value === 'clone') {
                 return value;
             } else if (typeof value === 'function') {
-                return toFn(value(to, from, dragEl, evt1), pull)(to, from, dragEl, evt1);
+                return toFn(value(to, from, dragEl, evt), pull)(to, from, dragEl, evt);
             } else {
                 const otherGroup = (pull ? to : from).options.group.name;
                 return value === true || typeof value === 'string' && value === otherGroup || Array.isArray(value) && value.indexOf(otherGroup) > -1;
@@ -626,7 +643,7 @@ function prepareGroup(options) {
 }
 function setupClickPrevention(documentExists, ChromeForAndroid) {
     if (documentExists && !ChromeForAndroid) {
-        document.addEventListener('click', function(evt1) {
+        document.addEventListener('click', function(evt) {
         }, true);
     }
 }
@@ -643,7 +660,7 @@ if (documentExists && !ChromeForAndroid) {
  * @class  Sortable
  * @param  {HTMLElement}  el
  * @param  {Object}       [options]
- */ function Sortable$1(el, options = {}) {
+ */ function Sortable(el, options = {}) {
     if (!(el && el.nodeType && el.nodeType === 1)) {
         throw `Sortable: \`el\` must be an HTMLElement, not ${({}).toString.call(el)}`;
     }
@@ -695,12 +712,10 @@ if (documentExists && !ChromeForAndroid) {
     on(el, 'mousedown', this._onDragStart);
     on(el, 'touchstart', this._onDragStart);
     on(el, 'pointerdown', this._onDragStart);
-    // Export
-    sortables.push(this);
 }
 // Sortable prototype methods
-Sortable$1.prototype = {
-    constructor: Sortable$1,
+Sortable.prototype = {
+    constructor: Sortable,
     _onDragStart: function(evt) {
     // ... implementation
     },
@@ -721,129 +736,27 @@ Sortable$1.prototype = {
     }
 };
 // Static properties
-Sortable$1.active = null;
-Sortable$1.dragged = null;
-Sortable$1.ghost = null;
-Sortable$1.clone = null;
-Sortable$1.cloneId = 0;
-Sortable$1.eventCanceled = ()=>false;
-Sortable$1.supportPointer = false;
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._dragStarted = function() {};
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1._captureAnimationState = ()=>{};
-Sortable$1._animateAll = ()=>{};
-Sortable$1.animate = ()=>{};
-Sortable$1.captureAnimationState = ()=>{};
-Sortable$1.animateAll = ()=>{};
-Sortable$1.lastPutMode = null;
-Sortable$1._onDragOver = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.captureAnimationState = ()=>{};
-Sortable$1.animateAll = ()=>{};
-Sortable$1.animate = ()=>{};
-Sortable$1.lastPutMode = null;
-Sortable$1._onDragOver = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.eventCanceled = ()=>false;
-Sortable$1.cloneId = 0;
-Sortable$1.supportPointer = false;
-Sortable$1.ghost = null;
-Sortable$1.clone = null;
-Sortable$1.dragged = null;
-Sortable$1.active = null;
-Sortable$1._dragStarted = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.captureAnimationState = ()=>{};
-Sortable$1.animateAll = ()=>{};
-Sortable$1.animate = ()=>{};
-Sortable$1.lastPutMode = null;
-Sortable$1._onDragOver = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.eventCanceled = ()=>false;
-Sortable$1.cloneId = 0;
-Sortable$1.supportPointer = false;
-Sortable$1.ghost = null;
-Sortable$1.clone = null;
-Sortable$1.dragged = null;
-Sortable$1.active = null;
-Sortable$1._dragStarted = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.captureAnimationState = ()=>{};
-Sortable$1.animateAll = ()=>{};
-Sortable$1.animate = ()=>{};
-Sortable$1.lastPutMode = null;
-Sortable$1._onDragOver = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.eventCanceled = ()=>false;
-Sortable$1.cloneId = 0;
-Sortable$1.supportPointer = false;
-Sortable$1.ghost = null;
-Sortable$1.clone = null;
-Sortable$1.dragged = null;
-Sortable$1.active = null;
-Sortable$1._dragStarted = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.captureAnimationState = ()=>{};
-Sortable$1.animateAll = ()=>{};
-Sortable$1.animate = ()=>{};
-Sortable$1.lastPutMode = null;
-Sortable$1._onDragOver = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.eventCanceled = ()=>false;
-Sortable$1.cloneId = 0;
-Sortable$1.supportPointer = false;
-Sortable$1.ghost = null;
-Sortable$1.clone = null;
-Sortable$1.dragged = null;
-Sortable$1.active = null;
-Sortable$1._dragStarted = ()=>{};
-Sortable$1._dragStartTimer = null;
-Sortable$1._dragStartId = null;
-Sortable$1._lastX = 0;
-Sortable$1._lastY = 0;
-Sortable$1._loopId = 0;
-Sortable$1.captureAnimationState = ()=>{};
-Sortable$1.animateAll = ()=>{};
-Sortable$1.animate = ()=>{};
-Sortable$1.lastPutMode = null;
-Sortable$1._onDragOver = ()=>{};
-const SortableCtor = Sortable$1;
+Sortable.active = null;
+Sortable.dragged = null;
+Sortable.ghost = null;
+Sortable.clone = null;
+Sortable.cloneId = 0;
+Sortable.eventCanceled = ()=>false;
+Sortable.supportPointer = false;
+Sortable._dragStartTimer = null;
+Sortable._dragStartId = null;
+Sortable._dragStarted = function() {};
+Sortable._lastX = 0;
+Sortable._lastY = 0;
+Sortable._loopId = 0;
+Sortable._captureAnimationState = ()=>{};
+Sortable._animateAll = ()=>{};
+Sortable.animate = ()=>{};
+Sortable.captureAnimationState = ()=>{};
+Sortable.animateAll = ()=>{};
+Sortable.lastPutMode = null;
+Sortable._onDragOver = ()=>{};
+const SortableCtor = Sortable;
 
 // @ts-nocheck
 let autoScrolls = [], scrollEl, scrollRootEl, scrolling = false, lastAutoScrollX, lastAutoScrollY, touchEvt, pointerElemChangedInterval;

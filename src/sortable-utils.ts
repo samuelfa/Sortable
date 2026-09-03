@@ -186,7 +186,13 @@ export function detectNearestEmptySortable(
 	y: number,
 	sortables: Sortable[],
 	expando: string,
-	getRect: (el: HTMLElement) => DOMRect
+	getRect: (
+		el: HTMLElement | Window,
+		relativeToContainingBlock?: boolean,
+		relativeToNonStaticParent?: boolean,
+		undoScale?: boolean,
+		container?: HTMLElement
+	) => DOMRect | null
 ): Sortable | null {
 	let ret: Sortable | null = null;
 	sortables.some((sortable) => {
