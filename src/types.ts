@@ -1,29 +1,32 @@
 export interface Sortable {
-	active: Sortable | null;
-	dragged: HTMLElement | null;
-	ghost: HTMLElement | null;
-	clone: HTMLElement | null;
-	cloneId: number;
-	eventCanceled: (evt: Event) => boolean;
-	supportPointer: boolean;
-	_dragStartTimer: ReturnType<typeof setTimeout> | number | null;
-	_dragStartId: ReturnType<typeof setTimeout> | number | null;
-	_dragStarted: (fallback: boolean, evt: Event) => void;
-	_lastX: number;
-	_lastY: number;
-	_loopId: number;
-	_captureAnimationState: () => void;
-	_animateAll: () => void;
-	animate: (dragEl: HTMLElement, rect: DOMRect) => void;
-	captureAnimationState: () => void;
-	animateAll: () => void;
-	lastPutMode: string | null;
-	_onDragOver: (evt: Event) => void;
-	evt: any;
+	[key: string]: any;
+	el: HTMLElement;
 	options: any;
+	active?: Sortable | null;
+	dragged?: HTMLElement | null;
+	ghost?: HTMLElement | null;
+	clone?: HTMLElement | null;
+	cloneId?: number;
+	eventCanceled?: (evt: Event) => boolean;
+	supportPointer?: boolean;
+	_dragStartTimer?: ReturnType<typeof setTimeout> | number | null;
+	_dragStartId?: ReturnType<typeof setTimeout> | number | null;
+	_dragStarted?: (fallback: boolean, evt: Event) => void;
+	_lastX?: number;
+	_lastY?: number;
+	_loopId?: number;
+	_captureAnimationState?: () => void;
+	_animateAll?: () => void;
+	animate?: (dragEl: HTMLElement, rect: DOMRect) => void;
+	captureAnimationState?: () => void;
+	animateAll?: () => void;
+	lastPutMode?: any;
+	_onDragOver?: (evt: Event) => void;
+	evt?: any;
 }
 
 export interface SortableConstructor {
+	[key: string]: any;
 	new (...args: any[]): Sortable;
 	active: Sortable | null;
 	dragged: HTMLElement | null;
@@ -95,37 +98,27 @@ export interface DispatchEventInfo {
 	extraEventProperties?: Record<string, any>;
 }
 
-export interface DispatchEventInfo {
-	sortable: Sortable;
-	rootEl: HTMLElement;
-	name: string;
-	targetEl?: HTMLElement;
-	cloneEl?: HTMLElement;
-	toEl?: HTMLElement;
-	fromEl?: HTMLElement;
-	oldIndex?: number;
-	newIndex?: number;
-	oldDraggableIndex?: number;
-	newDraggableIndex?: number;
-	originalEvent?: Event;
-	putSortable?: Sortable;
-	extraEventProperties?: Record<string, any>;
-}
-
 export type SortablePlugin = any;
 
 declare global {
 	interface HTMLElement {
-		animated?: boolean;
+		animated?: any;
 		animatingX?: boolean;
 		animatingY?: boolean;
-		toRect?: DOMRect;
+		toRect?: DOMRect | null;
+		fromRect?: DOMRect | null;
+		prevFromRect?: DOMRect | null;
+		prevToRect?: DOMRect | null;
+		thisAnimationDuration?: number | null;
+		animationTime?: number;
+		animationResetTimer?: any;
 		sortableIndex?: number;
 		expando?: any;
 		getAttribute(name: string): string | null;
 		src?: string;
 		href?: string;
 		style: CSSStyleDeclaration;
+		currentStyle?: CSSStyleDeclaration;
 		scrollTop: number;
 		scrollLeft: number;
 	}
@@ -172,7 +165,9 @@ declare global {
 		related?: HTMLElement;
 		relatedRect?: DOMRect;
 		willInsertAfter?: boolean;
+		clientX?: number;
+		clientY?: number;
+		touches?: TouchList | any[];
+		dataTransfer?: DataTransfer | null;
 	}
 }
-
-export type SortablePlugin = any;

@@ -124,14 +124,16 @@ export function matrix(el: HTMLElement | Window | string, selfOnly = false): str
 	if (typeof el === 'string') {
 		appliedTransforms = el;
 	} else {
-		do {
-			let transform = css(el, 'transform');
+		let curr: HTMLElement | null = el instanceof HTMLElement ? el : null;
+		while (curr) {
+			let transform = css(curr, 'transform');
 
 			if (transform && transform !== 'none') {
 				appliedTransforms = transform + ' ' + appliedTransforms;
 			}
-			/* jshint boss:true */
-		} while (!selfOnly && (el = el.parentNode));
+			if (selfOnly) break;
+			curr = curr.parentNode as HTMLElement | null;
+		}
 	}
 
 	const matrixFn =
@@ -187,12 +189,13 @@ function getRect(
 	undoScale = false,
 	container?: HTMLElement
 ): DOMRect | null {
-	if (!el.getBoundingClientRect && el !== window) return;
+	const targetEl = el as any;
+	if (!targetEl.getBoundingClientRect && el !== window) return null;
 
-	let elRect, top, left, bottom, right, height, width;
+	let elRect: DOMRect | undefined, top: number, left: number, bottom: number, right: number, height: number, width: number;
 
-	if (el !== window && el.parentNode && el !== getWindowScrollingElement()) {
-		elRect = el.getBoundingClientRect();
+	if (el !== window && targetEl.parentNode && el !== getWindowScrollingElement()) {
+		elRect = targetEl.getBoundingClientRect();
 		top = elRect.top;
 		left = elRect.left;
 		bottom = elRect.bottom;
@@ -213,39 +216,39 @@ function getRect(
 		el !== window
 	) {
 		// Adjust for translate()
-		container = container || el.parentNode;
+		let curContainer: any = container || targetEl.parentNode;
 
 		// solves #1123 (see: https://stackoverflow.com/a/37953806/6088312)
 		// Not needed on <= IE11
 		if (!IE11OrLess) {
 			do {
 				if (
-					container &&
-					container.getBoundingClientRect &&
-					(css(container, 'transform') !== 'none' ||
+					curContainer &&
+					curContainer.getBoundingClientRect &&
+					(css(curContainer, 'transform') !== 'none' ||
 						(relativeToNonStaticParent &&
-							css(container, 'position') !== 'static'))
+							css(curContainer, 'position') !== 'static'))
 				) {
-					let containerRect = container.getBoundingClientRect();
+					let containerRect = curContainer.getBoundingClientRect();
 
 					// Set relative to edges of padding box of container
 					top -=
-						containerRect.top + parseInt(css(container, 'border-top-width'));
+						containerRect.top + parseInt(css(curContainer, 'border-top-width'));
 					left -=
-						containerRect.left + parseInt(css(container, 'border-left-width'));
-					bottom = top + elRect.height;
-					right = left + elRect.width;
+						containerRect.left + parseInt(css(curContainer, 'border-left-width'));
+					bottom = top + (elRect ? elRect.height : height);
+					right = left + (elRect ? elRect.width : width);
 
 					break;
 				}
 				/* jshint boss:true */
-			} while ((container = container.parentNode));
+			} while ((curContainer = curContainer.parentNode));
 		}
 	}
 
 	if (undoScale && el !== window) {
 		// Adjust for scale()
-		let elMatrix = matrix(container || el) as DOMMatrix | null;
+		let elMatrix = matrix(container || targetEl) as DOMMatrix | null;
 		let scaleX = elMatrix && elMatrix.a;
 		let scaleY = elMatrix && elMatrix.d;
 
@@ -268,28 +271,41 @@ function getRect(
 		right: right,
 		width: width,
 		height: height,
-	};
+		x: left,
+		y: top,
+		toJSON() {
+			return this;
+		},
+	} as DOMRect;
 }
 
 /**
  * Returns the content rect of the element (bounding rect minus border and padding)
  * @param {HTMLElement} el
  */
-function getContentRect(el) {
+function getContentRect(el: HTMLElement): DOMRect {
 	const rect = getRect(el);
 	const paddingLeft = parseInt(css(el, 'padding-left')),
 		paddingTop = parseInt(css(el, 'padding-top')),
 		paddingRight = parseInt(css(el, 'padding-right')),
 		paddingBottom = parseInt(css(el, 'padding-bottom'));
-	const result: DOMRectInit = {
-		top: rect.top + paddingTop + parseInt(css(el, 'border-top-width')),
-		left: rect.left + paddingLeft + parseInt(css(el, 'border-left-width')),
-		width: el.clientWidth - paddingLeft - paddingRight,
-		height: el.clientHeight - paddingTop - paddingBottom,
-		bottom: rect.top + paddingTop + parseInt(css(el, 'border-top-width')) + el.clientHeight - paddingTop - paddingBottom,
-		right: rect.left + paddingLeft + parseInt(css(el, 'border-left-width')) + el.clientWidth - paddingLeft - paddingRight,
-	};
-	return result as DOMRect;
+	const top = rect.top + paddingTop + parseInt(css(el, 'border-top-width'));
+	const left = rect.left + paddingLeft + parseInt(css(el, 'border-left-width'));
+	const width = el.clientWidth - paddingLeft - paddingRight;
+	const height = el.clientHeight - paddingTop - paddingBottom;
+	return {
+		top,
+		left,
+		width,
+		height,
+		bottom: top + height,
+		right: left + width,
+		x: left,
+		y: top,
+		toJSON() {
+			return this;
+		},
+	} as DOMRect;
 }
 
 /**
@@ -332,12 +348,12 @@ function isScrolledPast(el, elSide, parentSide) {
  * @param  {Object} options       Parent Sortable's options
  * @return {HTMLElement}          The child at index childNum, or null if not found
  */
-function getChild(el, childNum, options, includeDragEl) {
+function getChild(el: HTMLElement, childNum = 0, options: any = {}, includeDragEl = false): HTMLElement | null {
 	let currentChild = 0,
 		i = 0,
-		children = el.children;
+		children = el ? el.children : ([] as any);
 
-	while (i < children.length) {
+	while (children && i < children.length) {
 		if (
 			children[i].style.display !== 'none' &&
 			children[i] !== Sortable.ghost &&
@@ -345,7 +361,7 @@ function getChild(el, childNum, options, includeDragEl) {
 			closest(children[i], options.draggable, el, false)
 		) {
 			if (currentChild === childNum) {
-				return children[i];
+				return children[i] as HTMLElement;
 			}
 			currentChild++;
 		}
@@ -361,8 +377,8 @@ function getChild(el, childNum, options, includeDragEl) {
  * @param  {selector} selector    Any other elements that should be ignored
  * @return {HTMLElement}          The last child, ignoring ghostEl
  */
-function lastChild(el, selector) {
-	let last = el.lastElementChild;
+function lastChild(el: HTMLElement, selector?: string): HTMLElement | null {
+	let last = el ? el.lastElementChild as HTMLElement | null : null;
 
 	while (
 		last &&
@@ -370,7 +386,7 @@ function lastChild(el, selector) {
 			css(last, 'display') === 'none' ||
 			(selector && !matches(last, selector)))
 	) {
-		last = last.previousElementSibling;
+		last = last.previousElementSibling as HTMLElement | null;
 	}
 
 	return last || null;
@@ -586,7 +602,12 @@ function getChildContainingRectFromElement(container: HTMLElement, options: any,
 	rect.height = rect.bottom - rect.top;
 	rect.x = rect.left;
 	rect.y = rect.top;
-	return rect;
+	return {
+		...rect,
+		toJSON() {
+			return this;
+		},
+	} as DOMRect;
 }
 
 const expando = 'Sortable' + new Date().getTime();

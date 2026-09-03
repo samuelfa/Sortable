@@ -1,5 +1,5 @@
 import { getRect, css, matrix, isRectEqual, indexOfObject } from './utils.js';
-import type { Sortable } from './Sortable.js';
+import { getGhostEl } from './state.js';
 
 interface AnimationState {
 	target: HTMLElement;
@@ -13,7 +13,6 @@ interface AnimationState {
 	animated?: number | boolean;
 	animatingX?: boolean;
 	animatingY?: boolean;
-	fromRect?: DOMRect;
 }
 
 export default function AnimationStateManager(): {
@@ -33,7 +32,7 @@ export default function AnimationStateManager(): {
 			const children = Array.from(this.el.children);
 
 			children.forEach((child: HTMLElement) => {
-				if (css(child, 'display') === 'none' || child === Sortable.ghost) return;
+				if (css(child, 'display') === 'none' || child === getGhostEl()) return;
 				animationStates.push({
 					target: child,
 					rect: getRect(child, false, false, false, undefined),
@@ -41,7 +40,7 @@ export default function AnimationStateManager(): {
 				const fromRect = { ...animationStates[animationStates.length - 1].rect };
 
 				if (child.thisAnimationDuration) {
-					const childMatrix = matrix(child, true);
+					const childMatrix = matrix(child, true) as any;
 					if (childMatrix) {
 						fromRect.top -= childMatrix.f;
 						fromRect.left -= childMatrix.e;
@@ -76,13 +75,14 @@ export default function AnimationStateManager(): {
 				let animatingThis = false;
 				const target = state.target;
 				const fromRect = target.fromRect;
-				const toRect = getRect(target, false, false, false, undefined);
+				const baseToRect = getRect(target, false, false, false, undefined);
+				let toRect: any = baseToRect ? { ...baseToRect } : null;
 				const prevFromRect = target.prevFromRect;
 				const prevToRect = target.prevToRect;
 				const animatingRect = state.rect;
-				const targetMatrix = matrix(target, true);
+				const targetMatrix = matrix(target, true) as any;
 
-				if (targetMatrix) {
+				if (targetMatrix && toRect) {
 					toRect.top -= targetMatrix.f;
 					toRect.left -= targetMatrix.e;
 				}
@@ -141,7 +141,7 @@ export default function AnimationStateManager(): {
 			if (duration) {
 				css(target, 'transition', '');
 				css(target, 'transform', '');
-				const elMatrix = matrix(this.el);
+				const elMatrix: any = matrix(this.el);
 				const scaleX = elMatrix && elMatrix.a;
 				const scaleY = elMatrix && elMatrix.d;
 				const translateX = (currentRect.left - toRect.left) / (scaleX || 1);

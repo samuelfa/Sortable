@@ -24,7 +24,7 @@ export default {
 				},
 				target: 'es2020',
 			},
-		}),
+		} as any),
 		resolve({ extensions: ['.ts'] }),
 		babel({
 			babelHelpers: 'bundled',

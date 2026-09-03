@@ -106,10 +106,12 @@ export const test = base.extend({
 			logs.push(`[Drag Math] ${message}`);
 		};
 
-		// 2. Intercept navigations and validate HTTP 200 automatically
+		// 2. Intercept navigations and validate HTTP 200 automatically (ignoring optional assets like favicon)
 		page.on('response', (response) => {
 			const status = response.status();
 			const url = response.url();
+
+			if (url.includes('favicon.ico')) return;
 
 			if (status >= 300) {
 				const redirectTo = response.headers()['location'] || 'Desconocido';

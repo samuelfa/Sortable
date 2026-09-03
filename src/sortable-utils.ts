@@ -207,7 +207,7 @@ export function detectNearestEmptySortable(
 }
 
 export function prepareGroup(options: any): void {
-	function toFn(value: any, pull: boolean) {
+	function toFn(value: any, pull?: boolean) {
 		return function (
 			to: Sortable,
 			from: Sortable,
@@ -354,6 +354,7 @@ export function onMove(
 	const sortable = fromEl[expandoProperty];
 	const onMoveFn = sortable.options.onMove;
 	let retVal: any;
+	let evt: Event;
 
 	if (window.CustomEvent && !IE11OrLess && !Edge) {
 		evt = new CustomEvent('move', {

@@ -1,4 +1,5 @@
 interface Plugin {
+	new (...args: any[]): any;
 	pluginName: string;
 	initializeByDefault?: boolean;
 	defaults?: Record<string, any>;

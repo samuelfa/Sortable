@@ -5,8 +5,11 @@
  * @author	Samuel Fernández <samuel84fa@gmail.com>
  * @license MIT
  */
-var Sortable = (function () {
-	'use strict';
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Sortable = factory());
+})(this, (function () { 'use strict';
 
 	function userAgent(pattern) {
 	    if (typeof window !== 'undefined' && window.navigator) {
@@ -1667,5 +1670,5 @@ var Sortable = (function () {
 
 	return SortableCtor;
 
-})();
+}));
 //# sourceMappingURL=Sortable.js.map

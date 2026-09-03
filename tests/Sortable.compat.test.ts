@@ -1,4 +1,4 @@
-import { test, expect, dragAndDrop } from './fixtures.js';
+import { test, expect, dragAndDrop } from './fixtures.ts';
 
 test.describe('Simple Sorting', () => {
 	test.beforeEach(async ({ page }) => {

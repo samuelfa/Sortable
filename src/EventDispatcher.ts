@@ -19,10 +19,7 @@ interface DispatchEventInfo {
 	extraEventProperties?: Record<string, any>;
 }
 
-interface Sortable {
-	options: Record<string, any>;
-	expando?: string;
-}
+import type { Sortable } from './types.js';
 
 interface SortableEvent extends Event {
 	to?: HTMLElement;

@@ -47,7 +47,7 @@ import {
 	getParentOrHost,
 } from './utils.js';
 
-import type { Sortable } from './types.js';
+import type { Sortable, SortableConstructor } from './types.js';
 import {
 	getDragEl,
 	setDragEl,
@@ -119,6 +119,7 @@ import {
 } from './state.js';
 
 import {
+	documentExists,
 	supportDraggable,
 	supportCssPointerEvents,
 	expandoProperty,
@@ -132,7 +133,6 @@ import {
 	hideGhostForTarget,
 	unhideGhostForTarget,
 	setupClickPrevention,
-	checkOutsideTargetEl,
 	globalDragOver,
 	onMove,
 	disableDraggable,
@@ -141,8 +141,6 @@ import {
 	ghostIsLast,
 	getSwapDirection,
 } from './sortable-utils.js';
-
-import { _globalDragOver, _onMove, _disableDraggable, _unsilent, _ghostIsFirst, _ghostIsLast, _getSwapDirection } from './global-events.js';
 
 // Setup click prevention
 setupClickPrevention(documentExists, ChromeForAndroid);
@@ -165,7 +163,7 @@ let pluginEvent = function (
 		cloneHidden: isCloneHidden(),
 		dragStarted: isMoved(),
 		putSortable: getPutSortable(),
-		activeSortable: Sortable.active,
+		activeSortable: (Sortable as any).active,
 		originalEvent: data.evt,
 
 		oldIndex: getOldIndex(),
@@ -323,7 +321,7 @@ function Sortable(this: SortableConstructor, el: HTMLElement, options: any = {})
 	on(el, 'pointerdown', this._onDragStart);
 
 	// Export
-	sortables.push(this);
+	addSortable(this as any);
 }
 
 // Sortable prototype methods
@@ -356,129 +354,27 @@ Sortable.prototype = {
 };
 
 // Static properties
-Sortable.active = null;
-Sortable.dragged = null;
-Sortable.ghost = null;
-Sortable.clone = null;
-Sortable.cloneId = 0;
-Sortable.eventCanceled = () => false;
-Sortable.supportPointer = false;
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._dragStarted = function () {};
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable._captureAnimationState = () => {};
-Sortable._animateAll = () => {};
-Sortable.animate = () => {};
-Sortable.captureAnimationState = () => {};
-Sortable.animateAll = () => {};
-Sortable.lastPutMode = null;
-Sortable._onDragOver = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.captureAnimationState = () => {};
-Sortable.animateAll = () => {};
-Sortable.animate = () => {};
-Sortable.lastPutMode = null;
-Sortable._onDragOver = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.eventCanceled = () => false;
-Sortable.cloneId = 0;
-Sortable.supportPointer = false;
-Sortable.ghost = null;
-Sortable.clone = null;
-Sortable.dragged = null;
-Sortable.active = null;
-Sortable._dragStarted = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.captureAnimationState = () => {};
-Sortable.animateAll = () => {};
-Sortable.animate = () => {};
-Sortable.lastPutMode = null;
-Sortable._onDragOver = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.eventCanceled = () => false;
-Sortable.cloneId = 0;
-Sortable.supportPointer = false;
-Sortable.ghost = null;
-Sortable.clone = null;
-Sortable.dragged = null;
-Sortable.active = null;
-Sortable._dragStarted = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.captureAnimationState = () => {};
-Sortable.animateAll = () => {};
-Sortable.animate = () => {};
-Sortable.lastPutMode = null;
-Sortable._onDragOver = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.eventCanceled = () => false;
-Sortable.cloneId = 0;
-Sortable.supportPointer = false;
-Sortable.ghost = null;
-Sortable.clone = null;
-Sortable.dragged = null;
-Sortable.active = null;
-Sortable._dragStarted = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.captureAnimationState = () => {};
-Sortable.animateAll = () => {};
-Sortable.animate = () => {};
-Sortable.lastPutMode = null;
-Sortable._onDragOver = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.eventCanceled = () => false;
-Sortable.cloneId = 0;
-Sortable.supportPointer = false;
-Sortable.ghost = null;
-Sortable.clone = null;
-Sortable.dragged = null;
-Sortable.active = null;
-Sortable._dragStarted = () => {};
-Sortable._dragStartTimer = null;
-Sortable._dragStartId = null;
-Sortable._lastX = 0;
-Sortable._lastY = 0;
-Sortable._loopId = 0;
-Sortable.captureAnimationState = () => {};
-Sortable.animateAll = () => {};
-Sortable.animate = () => {};
-Sortable.lastPutMode = null;
-Sortable._onDragOver = () => {};
+(Sortable as any).active = null;
+(Sortable as any).dragged = null;
+(Sortable as any).ghost = null;
+(Sortable as any).clone = null;
+(Sortable as any).cloneId = 0;
+(Sortable as any).eventCanceled = () => false;
+(Sortable as any).supportPointer = false;
+(Sortable as any)._dragStartTimer = null;
+(Sortable as any)._dragStartId = null;
+(Sortable as any)._dragStarted = function () {};
+(Sortable as any)._lastX = 0;
+(Sortable as any)._lastY = 0;
+(Sortable as any)._loopId = 0;
+(Sortable as any)._captureAnimationState = () => {};
+(Sortable as any)._animateAll = () => {};
+(Sortable as any).animate = () => {};
+(Sortable as any).captureAnimationState = () => {};
+(Sortable as any).animateAll = () => {};
+(Sortable as any).lastPutMode = null;
+(Sortable as any)._onDragOver = () => {};
 
-const SortableCtor: SortableConstructor = Sortable as SortableConstructor;
+const SortableCtor: SortableConstructor = Sortable as any;
 export { Sortable };
 export default SortableCtor;

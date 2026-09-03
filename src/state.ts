@@ -25,7 +25,7 @@ let tapDistanceLeft = 0;
 let tapDistanceTop = 0;
 let moved = false;
 let lastTarget: HTMLElement | null = null;
-let lastDirection = '';
+let lastDirection = 0;
 let pastFirstInvertThresh = false;
 let isCircumstantialInvertValue = false;
 let targetMoveDistance = 0;
@@ -213,10 +213,10 @@ export function setLastTarget(el: HTMLElement | null): void {
 	lastTarget = el;
 }
 
-export function getLastDirection(): string {
+export function getLastDirection(): number {
 	return lastDirection;
 }
-export function setLastDirection(dir: string): void {
+export function setLastDirection(dir: number): void {
 	lastDirection = dir;
 }
 

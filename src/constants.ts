@@ -1,6 +1,6 @@
 import { IE11OrLess, Edge, ChromeForAndroid, IOS } from './BrowserInfo.js';
 
-const documentExists = typeof document !== 'undefined';
+export const documentExists = typeof document !== 'undefined';
 export const PositionGhostAbsolutely = IOS;
 export const CSSFloatProperty = Edge || IE11OrLess ? 'cssFloat' : 'float';
 export const supportDraggable =
