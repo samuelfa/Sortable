@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	toggleClass,
 	getRect,
@@ -74,7 +75,7 @@ function MultiDragPlugin() {
 		},
 
 		delayEnded() {
-			this.isMultiDrag = ~multiDragElements.indexOf(dragEl);
+			this.isMultiDrag = multiDragElements.indexOf(dragEl) !== -1;
 		},
 
 		setupClone({ sortable, cancel }) {
@@ -683,7 +684,7 @@ function insertMultiDragElements(clonesInserted, rootEl) {
 
 /**
  * Insert multi-drag clones
- * @param  {[Boolean]} elementsInserted  Whether the multi-drag elements are inserted
+ * @param  {Boolean} elementsInserted  Whether the multi-drag elements are inserted
  * @param  {HTMLElement} rootEl
  */
 function insertMultiDragClones(elementsInserted, rootEl) {

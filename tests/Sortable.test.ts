@@ -1,4 +1,4 @@
-import { test, expect, dragAndDrop } from './fixtures.js';
+import { test, expect, dragAndDrop } from './fixtures.ts';
 
 const leeway = 2; // Safety buffer for subpixel rounding in Linux CI
 const itemHeight = 54; // px

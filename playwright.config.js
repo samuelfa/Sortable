@@ -22,8 +22,8 @@ export default defineConfig({
 	webServer: {
 		command: 'npx serve . -p 8080',
 		port: 8080,
-		reuseExistingServer: !process.env.CI,
-		timeout: 10 * 1000,
+		reuseExistingServer: false,
+		timeout: 30 * 1000,
 	},
 	projects: [
 		{

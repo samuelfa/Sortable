@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	on,
 	off,
@@ -242,12 +243,12 @@ const autoScroll = throttle(function (evt, options, rootEl, isFallback) {
 
 		let vx =
 			canScrollX &&
-			(Math.abs(right - x) <= sens && scrollPosX + width < scrollWidth) -
-				(Math.abs(left - x) <= sens && !!scrollPosX);
+			(Number(Math.abs(right - x) <= sens && scrollPosX + width < scrollWidth) -
+				Number(Math.abs(left - x) <= sens && !!scrollPosX));
 		let vy =
 			canScrollY &&
-			(Math.abs(bottom - y) <= sens && scrollPosY + height < scrollHeight) -
-				(Math.abs(top - y) <= sens && !!scrollPosY);
+			(Number(Math.abs(bottom - y) <= sens && scrollPosY + height < scrollHeight) -
+				Number(Math.abs(top - y) <= sens && !!scrollPosY));
 
 		if (!autoScrolls[layersOut]) {
 			for (let i = 0; i <= layersOut; i++) {

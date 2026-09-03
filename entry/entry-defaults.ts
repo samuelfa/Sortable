@@ -1,4 +1,4 @@
-import Sortable from '../src/Sortable.js';
+import Sortable from '../src/Sortable.ts';
 import AutoScroll from '../plugins/AutoScroll';
 import { RemoveOnSpill, RevertOnSpill } from '../plugins/OnSpill';
 // Extra
