@@ -102,7 +102,18 @@ export const test = base.extend({
 			}
 		});
 
-		page.debugLog = (message) => {
+		
+                page.on("framenavigated", async (frame) => {
+                  if (frame === page.mainFrame() && !frame.url().startsWith("about:")) {
+                    try {
+                      await page.waitForFunction(() => typeof window.Sortable !== "undefined", { timeout: 5000 });
+                    } catch (e) {
+                      console.error("⚠️ Sortable no se encontró tras navegar a: " + frame.url());
+                    }
+                  }
+                });
+  
+                page.debugLog = (message) => {
 			logs.push(`[Drag Math] ${message}`);
 		};
 
@@ -122,8 +133,7 @@ export const test = base.extend({
 			expect(response.status()).toBe(200);
 		});
 
-		// Wait for Sortable to be loaded before running tests
-		await page.waitForFunction(() => typeof window.Sortable !== 'undefined', { timeout: 10000 });
+		
 
 		await use(page);
 

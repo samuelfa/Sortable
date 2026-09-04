@@ -255,10 +255,10 @@ export function prepareGroup(options: any): void {
 	}
 
 	const group: any = {};
-	group.name = originalGroup.name;
-	group.checkPull = toFn(originalGroup.pull, true);
-	group.checkPut = toFn(originalGroup.put);
-	group.revertClone = originalGroup.revertClone;
+	group.name = options.group.name;
+	group.checkPull = toFn(options.group.pull, true);
+	group.checkPut = toFn(options.group.put);
+	group.revertClone = options.group.revertClone;
 
 	options.group = group;
 }

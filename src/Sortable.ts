@@ -376,5 +376,4 @@ Sortable.prototype = {
 (Sortable as any)._onDragOver = () => {};
 
 const SortableCtor: SortableConstructor = Sortable as any;
-export { Sortable };
 export default SortableCtor;
