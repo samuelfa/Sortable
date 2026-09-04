@@ -8,3 +8,9 @@ temp/
 coverage/
 .nyc_output/
 test-results/
+
+# Build outputs & Coverage
+dist/
+modular/
+.nyc_output/
+coverage/

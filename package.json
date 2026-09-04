@@ -4,8 +4,8 @@
   "version": "1.15.7",
   "type": "module",
   "description": "JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices. No jQuery required. Supports Meteor, AngularJS, React, Polymer, Vue, Knockout and any C[...]",
-  "main": "./Sortable.min.js",
-  "module": "modular/sortable.esm.js",
+  "main": "./dist/Sortable.min.js",
+  "module": "./dist/modular/sortable.esm.js",
   "scripts": {
     "build": "vite build",
     "lint": "eslint .",
@@ -71,10 +71,9 @@
     "url": "git+https://github.com/SortableJS/Sortable.git"
   },
   "files": [
-    "Sortable.js",
-    "Sortable.min.js",
-    "modular/",
-    "src/"
+    "dist/",
+    "src/",
+    "plugins/"
   ],
   "keywords": [
     "sortable",
@@ -90,5 +89,6 @@
   "license": "MIT",
   "dependencies": {
     "tslib": "^2.8.1"
-  }
+  },
+  "types": "./dist/index.d.ts"
 }
