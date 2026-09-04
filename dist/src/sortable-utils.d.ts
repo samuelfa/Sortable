@@ -1,0 +1,17 @@
+import { Sortable } from './types.js';
+export declare function detectDirection(el: HTMLElement, options: any): 'vertical' | 'horizontal';
+export declare function dragElInRowColumn(dragRect: DOMRect, targetRect: DOMRect, vertical: boolean): boolean;
+export declare function detectNearestEmptySortable(x: number, y: number, sortables: Sortable[], expando: string, getRect: (el: HTMLElement | Window, relativeToContainingBlock?: boolean, relativeToNonStaticParent?: boolean, undoScale?: boolean, container?: HTMLElement) => DOMRect | null): Sortable | null;
+export declare function prepareGroup(options: any): void;
+export declare function hideGhostForTarget(ghostEl: HTMLElement | null, supportCssPointerEvents: boolean): void;
+export declare function unhideGhostForTarget(ghostEl: HTMLElement | null, supportCssPointerEvents: boolean): void;
+export declare function setupClickPrevention(documentExists: boolean, ChromeForAndroid: boolean): void;
+export declare function nearestEmptyInsertDetectEvent(evt: Event, expando: string): void;
+export declare function checkOutsideTargetEl(evt: Event): void;
+export declare function globalDragOver(evt: Event): void;
+export declare function onMove(fromEl: HTMLElement, toEl: HTMLElement, dragEl: HTMLElement, dragRect: DOMRect, targetEl: HTMLElement | null, targetRect: DOMRect | null, originalEvent: Event, willInsertAfter: boolean): any;
+export declare function disableDraggable(el: HTMLElement): void;
+export declare function unsilent(): void;
+export declare function ghostIsFirst(evt: Event, vertical: boolean, sortable: Sortable, ghostEl: HTMLElement | null): boolean;
+export declare function ghostIsLast(evt: Event, vertical: boolean, sortable: Sortable, ghostEl: HTMLElement | null): boolean;
+export declare function getSwapDirection(evt: Event, target: HTMLElement, targetRect: DOMRect, vertical: boolean, swapThreshold: number, invertedSwapThreshold: number, invertSwap: boolean, isLastTarget: boolean): number;

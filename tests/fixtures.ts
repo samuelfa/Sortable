@@ -122,6 +122,9 @@ export const test = base.extend({
 			expect(response.status()).toBe(200);
 		});
 
+		// Wait for Sortable to be loaded before running tests
+		await page.waitForFunction(() => typeof window.Sortable !== 'undefined', { timeout: 10000 });
+
 		await use(page);
 
 		// Collect Istanbul coverage from browser
