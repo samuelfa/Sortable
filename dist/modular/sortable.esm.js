@@ -280,7 +280,7 @@ function N(e) {
 	let n = e.group;
 	(!n || typeof n != "object") && (e.group = { name: n });
 	let r = {};
-	r.name = n.name, r.checkPull = t(n.pull, !0), r.checkPut = t(n.put), r.revertClone = n.revertClone, e.group = r;
+	r.name = e.group.name, r.checkPull = t(e.group.pull, !0), r.checkPut = t(e.group.put), r.revertClone = e.group.revertClone, e.group = r;
 }
 function P(e, t) {
 	e && !t && document.addEventListener("click", function(e) {
@@ -332,6 +332,6 @@ F.prototype = {
 }, F.active = null, F.dragged = null, F.ghost = null, F.clone = null, F.cloneId = 0, F.eventCanceled = () => !1, F.supportPointer = !1, F._dragStartTimer = null, F._dragStartId = null, F._dragStarted = function() {}, F._lastX = 0, F._lastY = 0, F._loopId = 0, F._captureAnimationState = () => {}, F._animateAll = () => {}, F.animate = () => {}, F.captureAnimationState = () => {}, F.animateAll = () => {}, F.lastPutMode = null, F._onDragOver = () => {};
 var I = F;
 //#endregion
-export { F as Sortable, I as default };
+export { I as default };
 
 //# sourceMappingURL=sortable.esm.js.map
