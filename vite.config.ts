@@ -11,9 +11,10 @@ export default defineConfig({
       fileName: (format: string) => {
         if (format === 'umd') return 'Sortable.min.js';
         if (format === 'es') return 'modular/sortable.esm.js';
+        if (format === 'iife') return 'Sortable.iife.js';
         return `sortable.${format}.js`;
       },
-      formats: ['umd', 'es'],
+      formats: ['umd', 'es', 'iife'],
     },
     rollupOptions: {
       output: {
