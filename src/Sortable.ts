@@ -1,3 +1,4 @@
+import { getDefaultOptions, resolveOptions } from "./defaultOptions";
 // @ts-check
 /**!
  * Sortable
@@ -269,39 +270,8 @@ function Sortable(this: SortableConstructor, el: HTMLElement, options: any = {})
 	// Export instance
 	el[expandoProperty] = this;
 
-	const defaults: any = {
-		group: null,
-		sort: true,
-		disabled: false,
-		store: null,
-		handle: null,
-		draggable: /^[uo]l$/i.test(el.nodeName) ? '>li' : '>*',
-		swapThreshold: 1, // percentage; 0 <= x <= 1
-		invertSwap: false, // invert always
-		invertedSwapThreshold: null, // will be set to same as swapThreshold if default
-		removeCloneOnHide: true,
-		direction: function () {
-			return detectDirection(el, this.options);
-		},
-		ghostClass: 'sortable-ghost',
-		chosenClass: 'sortable-chosen',
-		dragClass: 'sortable-drag',
-		ignore: 'a, img',
-		filter: null,
-		preventOnFilter: true,
-		animation: 0,
-		easing: null,
-	};
-
-	// Assign defaults
-	for (const key in defaults) {
-		if (!(key in options)) {
-			options[key] = defaults[key];
-		}
-	}
-
-	// Prepare group
-	prepareGroup(options);
+	const defaults = getDefaultOptions(el);
+		options = resolveOptions(el, options);
 
 	// Initialize animation
 	this.animation = AnimationStateManager();

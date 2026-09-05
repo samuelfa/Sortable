@@ -87,8 +87,5 @@
     "mixin"
   ],
   "license": "MIT",
-  "dependencies": {
-    "tslib": "^2.8.1"
-  },
   "types": "./dist/index.d.ts"
 }
