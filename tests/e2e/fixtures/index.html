@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Playwright E2E Test Suite</title>
+  <style>
+    ul { list-style: none; padding: 0; width: 200px; }
+    li { padding: 10px; margin: 5px; background: #eee; border: 1px solid #ccc; cursor: move; }
+  </style>
+</head>
+<body>
+  <ul id="items">
+    <li id="item1">Item 1.1</li>
+    <li id="item2">Item 1.2</li>
+    <li id="item3">Item 1.3</li>
+  </ul>
+
+  <!-- Carga limpia de la build compilada -->
+  <script src="/dist/Sortable.min.js"></script>
+  <script>
+    if (typeof Sortable !== "undefined") {
+      new Sortable(document.getElementById("items"), {
+        animation: 150
+      });
+    }
+  </script>
+</body>
+</html>

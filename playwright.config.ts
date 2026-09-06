@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-        testDir: './tests',
+  testMatch: /.*\.spec\.ts/,
+        testDir: "./tests/e2e",
         fullyParallel: false,
         forbidOnly: !!process.env.CI,
         retries: process.env.CI ? 1 : 0,
@@ -21,7 +22,7 @@ export default defineConfig({
                 navigationTimeout: 5 * 1000,
         },
         webServer: {
-                command: 'npx serve . -p 8080',
+                command: 'npx serve tests/e2e/.public -p 8080',
                 port: 8080,
                 reuseExistingServer: true,
                 timeout: 30 * 1000,

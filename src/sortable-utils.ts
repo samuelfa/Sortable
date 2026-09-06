@@ -1,3 +1,6 @@
+export { getSwapDirection } from "./swap/getSwapDirection";
+export { swapState } from "./state/SwapState";
+
 import {
 	IE11OrLess,
 	Edge,
@@ -446,48 +449,6 @@ export function ghostIsLast(
 			(evt.clientX > lastElRect.right && evt.clientY > lastElRect.top);
 }
 
-export function getSwapDirection(
-	evt: Event,
-	target: HTMLElement,
-	targetRect: DOMRect,
-	vertical: boolean,
-	swapThreshold: number,
-	invertedSwapThreshold: number,
-	invertSwap: boolean,
-	isLastTarget: boolean
-): number {
-	const mouseOnAxis = vertical ? evt.clientY : evt.clientX;
-	const targetLength = vertical ? targetRect.height : targetRect.width;
-	const targetS1 = vertical ? targetRect.top : targetRect.left;
-	const targetS2 = vertical ? targetRect.bottom : targetRect.right;
-	let invert = false;
 
-	if (!invertSwap) {
-		if (isLastTarget && getTargetMoveDistance() < targetLength * swapThreshold) {
-			if (
-				!isPastFirstInvertThresh() &&
-				(getLastDirection() === 1
-					? mouseOnAxis > targetS1 + (targetLength * invertedSwapThreshold) / 2
-					: mouseOnAxis < targetS2 - (targetLength * invertedSwapThreshold) / 2)
-			) {
-				setPastFirstInvertThresh(true);
-			}
 
-			if (!isPastFirstInvertThresh()) {
-				if (
-					getLastDirection() === 1
-						? mouseOnAxis < targetS1 + getTargetMoveDistance()
-						: mouseOnAxis > targetS2 - getTargetMoveDistance()
-				) {
-					return -getLastDirection();
-				}
-			} else {
-				invert = true;
-			}
-		}
-	}
 
-	// Rest of the function would continue here...
-	// This is a partial extraction for demonstration
-	return 0;
-}

@@ -262,7 +262,21 @@ let checkOutsideTargetEl = function (evt: Event): void {
 function Sortable(this: SortableConstructor, el: HTMLElement, options: any = {}) {
 	if (!(el && el.nodeType && el.nodeType === 1)) {
 		throw `Sortable: \`el\` must be an HTMLElement, not ${{}.toString.call(el)}`;
-	}
+	
+    // Attach event listeners explicitly to instance element
+    if (this.el && typeof this.el.addEventListener === "function") {
+      this._onDragStart = this._onDragStart.bind(this);
+      this._onDragOver = this._onDragOver.bind(this);
+      this._onDragEnd = this._onDragEnd.bind(this);
+      this._onDrop = this._onDrop.bind(this);
+
+      this.el.addEventListener("dragstart", this._onDragStart, false);
+      this.el.addEventListener("dragover", this._onDragOver, false);
+      this.el.addEventListener("dragend", this._onDragEnd, false);
+      this.el.addEventListener("drop", this._onDrop, false);
+    }
+
+}
 
 	this.el = el; // root element
 	this.options = options = Object.assign({}, options);
@@ -299,23 +313,76 @@ Sortable.prototype = {
 	constructor: Sortable,
 
 	_onDragStart: function (evt: Event) {
-		// ... implementation
+		let target = evt.target as HTMLElement | null;
+		if (!target) return;
+
+		const container = this.el;
+		while (target && target.parentNode !== container) {
+			target = target.parentNode as HTMLElement | null;
+		}
+
+		if (target) {
+			target.draggable = true;
+			(Sortable as any).dragged = target;
+			(Sortable as any).active = this;
+			(this as any).dragEl = target;
+			if (typeof setDragEl === "function") setDragEl(target);
+		}
 	},
 
 	_onDragOver: function (evt: Event) {
-		// ... implementation
+		evt.preventDefault && evt.preventDefault();
+		const dragEl = (Sortable as any).dragged || (this as any).dragEl;
+		if (!dragEl) return;
+
+		let target = evt.target as HTMLElement | null;
+		if (!target) return;
+
+		const container = this.el;
+		while (target && target.parentNode !== container) {
+			target = target.parentNode as HTMLElement | null;
+		}
+
+		if (!target || target === dragEl) return;
+
+		const targetRect = target.getBoundingClientRect();
+		const vertical = this.options.direction ? this.options.direction === "vertical" : true;
+
+		const direction = getSwapDirection(
+			evt,
+			target,
+			targetRect,
+			vertical,
+			this.options.swapThreshold ?? 1,
+			this.options.invertedSwapThreshold ?? 1,
+			this.options.invertSwap ?? false,
+			false
+		);
+
+		if (direction === 1) {
+			if (target.nextSibling !== dragEl) {
+				container.insertBefore(dragEl, target.nextSibling);
+			}
+		} else if (direction === -1) {
+			if (target !== dragEl) {
+				container.insertBefore(dragEl, target);
+			}
+		}
 	},
 
 	_onDragEnd: function (evt: Event) {
-		// ... implementation
+		(Sortable as any).dragged = null;
+		(Sortable as any).active = null;
+		(this as any).dragEl = null;
 	},
-
 	_onDrop: function (evt: Event) {
-		// ... implementation
+		evt.preventDefault && evt.preventDefault();
+		(Sortable as any).dragged = null;
+		(Sortable as any).active = null;
+		(this as any).dragEl = null;
 	},
-
 	_onSelectStart: function (evt: Event) {
-		// ... implementation
+		evt.preventDefault && evt.preventDefault();
 	},
 
 	_isOutsideThisEl: function (target: HTMLElement): boolean {
