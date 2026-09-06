@@ -1,3 +1,4 @@
+import { getSwapDirection } from "./swap/getSwapDirection.js";
 import { getDefaultOptions, resolveOptions } from "./defaultOptions";
 // @ts-check
 /**!
@@ -140,7 +141,7 @@ import {
 	unsilent,
 	ghostIsFirst,
 	ghostIsLast,
-	getSwapDirection,
+	
 } from './sortable-utils.js';
 
 // Setup click prevention
@@ -234,16 +235,23 @@ let nearestEmptyInsertDetectEvent = function (evt: Event): void {
 	);
 
 	if (nearest) {
-		// Create imitation event
-		let event: any = {};
-		for (let i in evt) {
-			if (Object.prototype.hasOwnProperty.call(evt, i)) {
-				event[i] = evt[i];
-			}
+		let event: any = Object.create(evt);
+		if ("clientX" in evt && "clientY" in evt) {
+			event.clientX = (evt as MouseEvent).clientX;
+			event.clientY = (evt as MouseEvent).clientY;
+			event.pageX = (evt as MouseEvent).pageX;
+			event.pageY = (evt as MouseEvent).pageY;
+		} else if ("touches" in evt && (evt as TouchEvent).touches?.length > 0) {
+			const touch = (evt as TouchEvent).touches[0];
+			event.clientX = touch.clientX;
+			event.clientY = touch.clientY;
+			event.pageX = touch.pageX;
+			event.pageY = touch.pageY;
+		} else {
+			console.warn("[Sortable] Imitação de evento en nearestEmptyInsertDetectEvent abortada: sin coordenadas geométricas válidas en evt.");
+			return;
 		}
 		event.target = event.rootEl = nearest;
-		event.preventDefault = void 0;
-		event.stopPropagation = void 0;
 		nearest[expandoProperty]._onDragOver(event);
 	}
 };
@@ -271,7 +279,8 @@ function Sortable(this: SortableConstructor, el: HTMLElement, options: any = {})
       this._onDrop = this._onDrop.bind(this);
 
       this.el.addEventListener("dragstart", this._onDragStart, false);
-      this.el.addEventListener("dragover", this._onDragOver, false);
+      this.el.addEventListener("dragover", this._onDragOver, true);
+		document.addEventListener("dragover", this._onDragOver, true);
       this.el.addEventListener("dragend", this._onDragEnd, false);
       this.el.addEventListener("drop", this._onDrop, false);
     }
@@ -313,8 +322,11 @@ Sortable.prototype = {
 	constructor: Sortable,
 
 	_onDragStart: function (evt: Event) {
+		const dragEl = evt.target as HTMLElement;
+		(Sortable as any).dragged = dragEl;
+		(this as any).dragEl = dragEl;
 		let target = evt.target as HTMLElement | null;
-		if (!target) return;
+		if (!target) { console.warn("[Sortable] _onDragStart abortado: evento emitido sin target válido."); return; }
 
 		const container = this.el;
 		while (target && target.parentNode !== container) {
@@ -327,24 +339,43 @@ Sortable.prototype = {
 			(Sortable as any).active = this;
 			(this as any).dragEl = target;
 			if (typeof setDragEl === "function") setDragEl(target);
+			document.addEventListener("dragover", globalDragOver, false);
 		}
 	},
 
 	_onDragOver: function (evt: Event) {
-		evt.preventDefault && evt.preventDefault();
+		if (evt.cancelable) {
+			evt.preventDefault();
+		}
+
 		const dragEl = (Sortable as any).dragged || (this as any).dragEl;
-		if (!dragEl) return;
+		if (!dragEl) {
+			console.warn("[Sortable] _onDragOver abortado: dragEl no definido o nulo.");
+			return;
+		}
 
 		let target = evt.target as HTMLElement | null;
-		if (!target) return;
+		if (!target) {
+			console.warn("[Sortable] _onDragOver abortado: target nulo en el evento.");
+			return;
+		}
 
 		const container = this.el;
 		while (target && target.parentNode !== container) {
 			target = target.parentNode as HTMLElement | null;
 		}
 
-		if (!target || target === dragEl) return;
+		if (!target) {
+			console.warn("[Sortable] _onDragOver abortado: el elemento target está fuera del contenedor actual.", { container, originalTarget: evt.target });
+			return;
+		}
 
+		if (target === dragEl) {
+			console.warn("[Sortable] _onDragOver ignorado: target es idéntico a dragEl.");
+			return;
+		}
+
+		const activeEl = (Sortable as any).ghost || dragEl;
 		const targetRect = target.getBoundingClientRect();
 		const vertical = this.options.direction ? this.options.direction === "vertical" : true;
 
@@ -360,16 +391,30 @@ Sortable.prototype = {
 		);
 
 		if (direction === 1) {
-			if (target.nextSibling !== dragEl) {
-				container.insertBefore(dragEl, target.nextSibling);
+			const next = target.nextSibling;
+			if (next !== activeEl) {
+				const parent = target.parentNode || container;
+				parent.insertBefore(activeEl, next);
+				if (activeEl !== dragEl) {
+					parent.insertBefore(dragEl, next);
+				}
+			} else {
+				console.warn("[Sortable] Swap dirección 1 omitido: target.nextSibling es el elemento activo.", { target: target.textContent, activeEl: activeEl.textContent });
 			}
 		} else if (direction === -1) {
-			if (target !== dragEl) {
-				container.insertBefore(dragEl, target);
+			if (target !== activeEl) {
+				const parent = target.parentNode || container;
+				parent.insertBefore(activeEl, target);
+				if (activeEl !== dragEl) {
+					parent.insertBefore(dragEl, target);
+				}
+			} else {
+				console.warn("[Sortable] Swap dirección -1 omitido: target es el elemento activo.", { target: target.textContent, activeEl: activeEl.textContent });
 			}
+		} else {
+			console.warn("[Sortable] Swap omitido: direction evaluada a 0 para target.", { target: target.textContent, dragEl: dragEl.textContent });
 		}
 	},
-
 	_onDragEnd: function (evt: Event) {
 		(Sortable as any).dragged = null;
 		(Sortable as any).active = null;
@@ -410,7 +455,6 @@ Sortable.prototype = {
 (Sortable as any).captureAnimationState = () => {};
 (Sortable as any).animateAll = () => {};
 (Sortable as any).lastPutMode = null;
-(Sortable as any)._onDragOver = () => {};
 
 const SortableCtor: SortableConstructor = Sortable as any;
 export default SortableCtor;
