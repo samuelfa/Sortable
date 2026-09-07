@@ -32,11 +32,18 @@ export async function dragAndDrop(
 	const startX = sourceBox.x + sourceBox.width * sourcePos.x;
 	const startY = sourceBox.y + sourceBox.height * sourcePos.y;
 
-	const isMovingDown = targetBox.y > sourceBox.y;
-	const defaultTargetY = isMovingDown ? 0.8 : 0.2;
+	// Si se pasa targetPosition explícito, se usa sin modificar.
+	// Si no, se calcula según la dirección para superar la mitad.
+	let targetPosX = 0.5;
+	let targetPosY = 0.5;
 
-	const targetPosX = options.targetPosition ? options.targetPosition.x : 0.5;
-	const targetPosY = options.targetPosition ? options.targetPosition.y : defaultTargetY;
+	if (options.targetPosition) {
+		targetPosX = options.targetPosition.x;
+		targetPosY = options.targetPosition.y;
+	} else {
+		const isMovingDown = targetBox.y > sourceBox.y;
+		targetPosY = isMovingDown ? 0.8 : 0.2;
+	}
 
 	const endX = targetBox.x + targetBox.width * targetPosX;
 	const endY = targetBox.y + targetBox.height * targetPosY;
@@ -44,7 +51,7 @@ export async function dragAndDrop(
 	await page.mouse.move(startX, startY);
 	await page.mouse.down();
 	if (afterDown) await page.waitForTimeout(afterDown);
-	
+
 	if (usesNudge) {
 		await page.mouse.move(startX + 3, startY);
 		await page.waitForTimeout(80);
