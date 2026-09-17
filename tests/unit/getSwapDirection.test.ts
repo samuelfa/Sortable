@@ -31,9 +31,15 @@ describe("Unit: getSwapDirection Logic", () => {
     expect(dir).toBe(-1);
   });
 
-  test("Debe invertir la dirección cuando invertSwap es true", () => {
-    const evt = { clientX: 100, clientY: 160 };
-    const dir = getSwapDirection(evt, {} as any, targetRect, true, 1, 1, true, false);
-    expect(dir).toBe(-1);
+  test("Debe calcular dirección con invertSwap según regiones superior e inferior", () => {
+    // Región superior (< 150) -> -1
+    const evtTop = { clientX: 100, clientY: 120 };
+    const dirTop = getSwapDirection(evtTop, {} as any, targetRect, true, 1, 1, true, false);
+    expect(dirTop).toBe(-1);
+
+    // Región inferior (> 150) -> 1
+    const evtBottom = { clientX: 100, clientY: 160 };
+    const dirBottom = getSwapDirection(evtBottom, {} as any, targetRect, true, 1, 1, true, false);
+    expect(dirBottom).toBe(1);
   });
 });

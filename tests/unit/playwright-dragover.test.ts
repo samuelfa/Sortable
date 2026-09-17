@@ -25,19 +25,19 @@ describe("Unit: DragOver Geometry and Swap Thresholds (SortableJS Parity)", () =
     (Sortable as any).active = null;
   });
 
-  test("should NOT swap when pointer is in upper half of target (clientY < midpoint)", () => {
-    const sortable = new Sortable(container, {});
+  test("should NOT swap when pointer is in buffer zone (clientY in 0%-20% buffer)", () => {
+    const sortable = new Sortable(container, { swapThreshold: 0.6 });
     const item1 = container.children[0] as HTMLElement;
     const item3 = container.children[2] as HTMLElement;
 
-    // Simulate target dimensions: top 200, bottom 300 (midpoint at 250)
+    // Simulate target dimensions: top 200, bottom 300 (height 100, thresholdOffset 20, active zone 220..280)
     vi.spyOn(item3, "getBoundingClientRect").mockImplementation(() => ({
       top: 200, bottom: 300, left: 0, right: 100, width: 100, height: 100, x: 0, y: 200, toJSON: () => {}
     }));
 
     (Sortable as any).dragged = item1;
 
-    // Event in upper half (clientY = 210 < middle 250) -> direction = -1
+    // Event in upper buffer zone (clientY = 210 < thresholdMin 220) -> direction = 0
     const dragOverEvt = new MouseEvent("dragover", {
       clientX: 50,
       clientY: 210,
@@ -53,8 +53,8 @@ describe("Unit: DragOver Geometry and Swap Thresholds (SortableJS Parity)", () =
     expect(childrenText).toEqual(["Item 1.1", "Item 1.2", "Item 1.3"]);
   });
 
-  test("should swap correctly when pointer crosses target midpoint (clientY > midpoint)", () => {
-    const sortable = new Sortable(container, {});
+  test("should swap correctly when pointer enters active zone (clientY in 20%-80% active zone)", () => {
+    const sortable = new Sortable(container, { swapThreshold: 0.6 });
     const item1 = container.children[0] as HTMLElement;
     const item3 = container.children[2] as HTMLElement;
 
@@ -64,7 +64,7 @@ describe("Unit: DragOver Geometry and Swap Thresholds (SortableJS Parity)", () =
 
     (Sortable as any).dragged = item1;
 
-    // Event past midpoint (clientY = 260 > middle 250) -> direction = 1
+    // Event inside active zone (clientY = 260, between 220 and 280) -> direction = 1
     const dragOverEvt = new MouseEvent("dragover", {
       clientX: 50,
       clientY: 260,

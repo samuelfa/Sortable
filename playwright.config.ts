@@ -16,14 +16,14 @@ export default defineConfig({
         use: {
                 headless: true,
                 viewport: { width: 1280, height: 1000 },
-                baseURL: 'http://localhost:8080',
+                baseURL: 'http://localhost:8088',
                 trace: 'on-first-retry',
                 actionTimeout: 5 * 1000,
                 navigationTimeout: 5 * 1000,
         },
         webServer: {
-                command: 'npx serve tests/e2e/.public -p 8080',
-                port: 8080,
+                command: 'npx serve tests/e2e/.public -p 8088',
+                port: 8088,
                 reuseExistingServer: true,
                 timeout: 30 * 1000,
         },

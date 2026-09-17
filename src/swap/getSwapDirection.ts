@@ -22,19 +22,23 @@ export function getSwapDirection(
 	const targetS2 = vertical ? targetRect.bottom : targetRect.right;
 	const middle = targetS1 + targetLength / 2;
 
-	const threshold = invertSwap
-		? (typeof invertedSwapThreshold === "number" ? invertedSwapThreshold : swapThreshold)
-		: swapThreshold;
+	if (invertSwap) {
+		const invThreshold = typeof invertedSwapThreshold === "number" ? invertedSwapThreshold : 1;
+		const thresholdOffset = (targetLength * invThreshold) / 2;
+		
+		if (mouseOnAxis < targetS1 + thresholdOffset) return -1;
+		if (mouseOnAxis > targetS2 - thresholdOffset) return 1;
+		return 0;
+	}
 
-	const thresholdOffset = (targetLength * (1 - threshold)) / 2;
+	const thresholdOffset = (targetLength * (1 - swapThreshold)) / 2;
 	const isPastThresholdMin = mouseOnAxis >= targetS1 + thresholdOffset;
 	const isPastThresholdMax = mouseOnAxis <= targetS2 - thresholdOffset;
 
 	if (isPastThresholdMin && isPastThresholdMax) {
 		let direction = 0;
 
-		// Si se proveen índices explícitos (flujo dinámico de dragover)
-		if (typeof dragIndex === 'number' && typeof targetIndex === 'number') {
+		if (typeof dragIndex === "number" && typeof targetIndex === "number") {
 			if (dragIndex < targetIndex) {
 				direction = 1;
 			} else if (dragIndex > targetIndex) {
@@ -43,12 +47,8 @@ export function getSwapDirection(
 				direction = mouseOnAxis > middle ? 1 : -1;
 			}
 		} else {
-			// Fallback para llamadas unitarias aisladas sin contexto de lista
+			// Fallback para tests unitarios aislados sin contexto de índices
 			direction = mouseOnAxis > middle ? 1 : -1;
-		}
-
-		if (invertSwap) {
-			direction *= -1;
 		}
 
 		if (swapState) {
