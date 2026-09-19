@@ -5,7 +5,11 @@ test.describe('Simple Sorting', () => {
 		await page.goto('/tests/single-list.html');
 	});
 
-	test('Sort down list', async ({ page }) => {
+	test.beforeEach(async ({ page }) => {
+    page.on('console', msg => console.log('🌐 [BROWSER]:', msg.text()));
+});
+
+test('Sort down list', async ({ page }) => {
 		const list1 = page.locator('#list1');
 
 		const dragStartPosition = list1.locator('> *').nth(0);
@@ -26,7 +30,11 @@ test.describe('Simple Sorting', () => {
 		await expect(targetEndPosition).toHaveText(targetText);
 	});
 
-	test('Sort up list', async ({ page }) => {
+	test.beforeEach(async ({ page }) => {
+    page.on('console', msg => console.log('🌐 [BROWSER]:', msg.text()));
+});
+
+test('Sort up list', async ({ page }) => {
 		const list1 = page.locator('#list1');
 
 		const dragStartPosition = list1.locator('> *').nth(2);

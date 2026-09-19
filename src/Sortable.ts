@@ -1,8 +1,13 @@
+
 import { getSwapDirection } from "./swap/getSwapDirection";
 import { prepareGroup } from "./sortable-utils";
 import { getEventCoordinates } from "./geometry/coordinates";
 
 const expando = 'Sortable' + new Date().getTime();
+
+let __dragOverSeq = 0;
+let __isProcessingDragOver = false;
+let _silent = false;
 
 function getIndex(el: HTMLElement): number {
 	let index = 0;
@@ -13,8 +18,6 @@ function getIndex(el: HTMLElement): number {
 	}
 	return index;
 }
-
-let _silent = false;
 
 export default class Sortable {
 	el: HTMLElement;
@@ -176,6 +179,12 @@ export default class Sortable {
 			target = target.parentNode as HTMLElement | null;
 		}
 
+                console.log("🔍 [Sortable Telemetry]", {
+                        targetTag: target?.tagName,
+                        isContainer: target === this.el,
+                        isActiveEl: target === Sortable.dragged
+                });
+
 		if (target && target !== this.el) {
 			if (this.options.handle) {
 				const handleEl = (evt.target as HTMLElement).closest(this.options.handle);
@@ -278,6 +287,7 @@ export default class Sortable {
 	}
 
 	_onDragStart(evt: DragEvent) {
+                console.log("🏁 [_onDragStart]", { targetTag: (evt.target as HTMLElement)?.tagName });
 		if (this.options.disabled) {
 			evt.preventDefault();
 			return;
@@ -315,6 +325,21 @@ export default class Sortable {
 	}
 
 	_onDragOver(evt: DragEvent) {
+                const seq = ++__dragOverSeq;
+                const now = typeof performance !== "undefined" ? performance.now().toFixed(2) : Date.now();
+                const overlapping = __isProcessingDragOver;
+                __isProcessingDragOver = true;
+
+                console.log("🔥 [ACTIVATION #" + seq + "] type: " + evt.type + " | target: " + (evt.target as HTMLElement)?.tagName + " | time: " + (typeof performance !== "undefined" ? performance.now().toFixed(2) : Date.now()) + "ms");
+                
+                // Asegurarnos de liberar el flag al salir o usar un try/finally implícito con un setTimeout/microtask
+                setTimeout(() => { __isProcessingDragOver = false; }, 0);
+                console.log("🚀 [_onDragOver START]", {
+                        clientX: (evt as any).clientX,
+                        clientY: (evt as any).clientY,
+                        targetTag: (evt.target as HTMLElement)?.tagName,
+                        targetText: (evt.target as HTMLElement)?.textContent?.trim().slice(0, 10)
+                });
 		if (_silent) return;
 
 		evt.preventDefault();
@@ -395,16 +420,32 @@ export default class Sortable {
 			dragIndex,
 			targetIndex
 		);
+                console.log("🧭 [Swap Check Detailed]", {
+                        direction,
+                        dragIndex: typeof getIndex === "function" ? getIndex(Sortable.dragged) : "unknown",
+                        targetIndex: target && typeof getIndex === "function" ? getIndex(target) : "unknown",
+                        targetTag: target?.tagName,
+                        targetText: target?.textContent?.trim().slice(0, 12)
+                });
+                console.log("🧭 [Swap Evaluation]", {
+                        direction,
+                        targetTag: target?.tagName,
+                        targetText: target?.textContent?.trim().slice(0, 10),
+                        isContainer: target === this.el,
+                        isActiveEl: target === Sortable.dragged
+                });
+                console.log("📐 [Swap Direction]", { direction });
 
 		if (direction === 0) return;
 
-		if (direction === 1) {
+		console.log("⚡ [Branch ENTERED] direction === 1");
+                console.log("⚡ [Executing Branch] direction === 1 -> Inserting BEFORE target");
+                if (direction === 1) {
+                console.log("⚡ [Ejecutando Rama] direction === 1", { target: target?.textContent?.trim() });
 			const next = target.nextSibling;
 			if (next !== activeEl) {
 				_silent = true;
-				setTimeout(() => {
-					_silent = false;
-				}, 30);
+				Promise.resolve().then(() => { _silent = false; });
 
 				if (next) {
 					this.el.insertBefore(activeEl, next);
@@ -412,12 +453,12 @@ export default class Sortable {
 					this.el.appendChild(activeEl);
 				}
 			}
-		} else if (direction === -1) {
+		console.log("⚡ [Branch ENTERED] direction === -1");
+                console.log("⚡ [Executing Branch] direction === -1 -> Inserting AFTER target (or fallback)");
+                } else if (direction === -1) {
 			if (target.previousSibling !== activeEl) {
 				_silent = true;
-				setTimeout(() => {
-					_silent = false;
-				}, 30);
+				Promise.resolve().then(() => { _silent = false; });
 
 				this.el.insertBefore(activeEl, target);
 			}
@@ -431,6 +472,7 @@ export default class Sortable {
 	}
 
 	_onDrop(evt: DragEvent) {
+                console.log("🏁 [_onDrop triggered]");
 		evt.preventDefault();
 		Sortable.dragged = null;
 		Sortable.active = null;

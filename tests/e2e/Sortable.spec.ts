@@ -30,7 +30,8 @@ async function dragToThresholdWithDebug(
 	const usesNudge = ['mobile-touch', 'webkit'].includes(
 		test.info().project.name
 	);
-	const dragSteps = 1;
+	// Regular swap: center=active swap zone (needs steps on fallback), top/bottom=buffer zones (1 step).
+	const dragSteps = zone === 'center' ? (usesNudge ? 5 : 1) : 1;
 	// Settling lets each engine's native drag loop engage before the move.
 	const settleAfterDown = usesNudge ? 60 : 100;
 	const settleBeforeUp = usesNudge ? 120 : 150;
@@ -134,7 +135,8 @@ async function dragToInvertedThresholdWithDebug(
 	const usesNudge = ['mobile-touch', 'webkit'].includes(
 		test.info().project.name
 	);
-	const dragSteps = 1;
+	// In inverted mode: center=buffer (1 step), top/bottom/past_edge=swap zones (need steps on fallback).
+	const dragSteps = (zone === 'center') ? 1 : (usesNudge ? 5 : 1);
 	// Settling lets each engine's native drag loop engage before the move.
 	const settleAfterDown = usesNudge ? 60 : 100;
 	const settleBeforeUp = usesNudge ? 120 : 150;
