@@ -7,7 +7,7 @@ export default defineConfig({
         forbidOnly: !!process.env.CI,
         retries: process.env.CI ? 1 : 0,
         workers: process.env.CI ? 2 : 1,
-        maxFailures: 1,
+        maxFailures: 0,
         timeout: 10 * 1000,
         expect: {
                 timeout: 5 * 1000,

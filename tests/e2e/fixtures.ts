@@ -113,7 +113,16 @@ export const test = base.extend({
 
 			if (url.includes('favicon.ico')) return;
 
-			if (status >= 300) {
+			// Allow 3xx redirects (common with trailing slash handling in static servers)
+			if (status >= 300 && status < 400) {
+				const redirectTo = response.headers()['location'] || 'Desconocido';
+				console.log(`\n🔶 HTTP ${status} redirect en la petición:`);
+				console.log(`   URL solicitada: ${url}`);
+				console.log(`   Redirige a:     ${redirectTo}\n`);
+				return;
+			}
+
+			if (status >= 400) {
 				const redirectTo = response.headers()['location'] || 'Desconocido';
 				console.log(`\n🔴 HTTP ${status} en la petición:`);
 				console.log(`   URL solicitada: ${url}`);

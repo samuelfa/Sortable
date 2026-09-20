@@ -2,6 +2,7 @@
 import { getSwapDirection } from "./swap/getSwapDirection";
 import { prepareGroup } from "./sortable-utils";
 import { getEventCoordinates } from "./geometry/coordinates";
+import { getParentOrHost } from "./utils";
 
 const expando = 'Sortable' + new Date().getTime();
 
@@ -254,10 +255,33 @@ export default class Sortable {
 								dataTransfer: { dropEffect: "move" }
 							};
 
-							for (const s of Sortable.sortables) {
-								if (s.el.contains(elFromPoint) || s.el === elFromPoint) {
-									s._onDragOver(simulatedEvt);
+							console.error(`[FALLBACK] TRIGGERED coords=(${coords.x},${coords.y}) elFromPoint=${elFromPoint.tagName}`);
+
+							// Traversia de cadena de padres (como JS original _emulateDragOver)
+							let target = elFromPoint;
+							let parent = target;
+							while (target && target.shadowRoot) {
+								target = target.shadowRoot.elementFromPoint(coords.x, coords.y) as HTMLElement | null;
+								if (target === parent) break;
+								parent = target;
+							}
+
+							// Walk up parent chain calling _onDragOver on each Sortable
+							let current = parent;
+							let depth = 0;
+							while (current) {
+								const sortable = (current as any)[expando];
+								if (sortable) {
+									// DEBUG
+									console.error(`[FALLBACK DEBUG] depth=${depth}, sortable.el.id=${sortable.el.id}, current.id=${current.id}, rootEl=${sortable.el.id}`);
+									// Pasar rootEl para que _onDragOver sepa en qué contenedor actuar (como JS original)
+									const evtWithRoot = { ...simulatedEvt, rootEl: current };
+									const inserted = sortable._onDragOver(evtWithRoot);
+									if (inserted && !sortable.options.dragoverBubble) {
+										break;
+									}
 								}
+								current = getParentOrHost(current);
 							}
 						}
 					}
@@ -340,12 +364,15 @@ export default class Sortable {
                         targetTag: (evt.target as HTMLElement)?.tagName,
                         targetText: (evt.target as HTMLElement)?.textContent?.trim().slice(0, 10)
                 });
-		if (_silent) return;
+		if (_silent) return false;
 
 		evt.preventDefault();
 		if (evt.dataTransfer) {
 			evt.dataTransfer.dropEffect = "move";
 		}
+
+		// Use evt.rootEl for fallback cross-list calls, fallback to this.el
+		const container = (evt as any).rootEl || this.el;
 
 		const hasClientX = typeof evt.clientX === 'number';
 		const hasClientY = typeof evt.clientY === 'number';
@@ -353,13 +380,13 @@ export default class Sortable {
 
 		if (!hasClientX && !hasClientY && !hasTouches) {
 			console.warn("[Sortable] _onDragOver sin coordenadas geométricas", evt);
-			return;
+			return false;
 		}
 
 		const activeEl = Sortable.dragged;
 		if (!activeEl) {
 			console.warn("[Sortable] _onDragOver abortado: dragEl no definido.");
-			return;
+			return false;
 		}
 
 		const isOwner = activeEl.parentNode === this.el;
@@ -371,7 +398,7 @@ export default class Sortable {
 			const canPut = this.options.group && this.options.group.checkPut ? this.options.group.checkPut(this, fromSortable, activeEl, evt) : false;
 			const canPull = fromSortable.options.group && fromSortable.options.group.checkPull ? fromSortable.options.group.checkPull(this, fromSortable, activeEl, evt) : false;
 
-			if (!canPut || !canPull) return;
+			if (!canPut || !canPull) return false;
 
 			if (canPull === 'clone' && !Sortable.clone) {
 				const clone = activeEl.cloneNode(true) as HTMLElement;
@@ -383,7 +410,7 @@ export default class Sortable {
 		let target = evt.target as HTMLElement | null;
 		while (target && target.parentNode !== this.el) {
 			if ((target as any)[expando]) {
-				return;
+				return false;
 			}
 			target = target.parentNode as HTMLElement | null;
 		}
@@ -392,10 +419,10 @@ export default class Sortable {
 			if (this.el.children.length === 0 && !isOwner) {
 				this.el.appendChild(activeEl);
 			}
-			return;
+			return false;
 		}
 
-		if (target === activeEl) return;
+		if (target === activeEl) return false;
 
 		const targetRect = target.getBoundingClientRect();
 		const isVertical = this.options.direction !== "horizontal";
@@ -448,21 +475,24 @@ export default class Sortable {
 				Promise.resolve().then(() => { _silent = false; });
 
 				if (next) {
-					this.el.insertBefore(activeEl, next);
+					container.insertBefore(activeEl, next);
 				} else {
-					this.el.appendChild(activeEl);
+					container.appendChild(activeEl);
 				}
 			}
-		console.log("⚡ [Branch ENTERED] direction === -1");
+			return true;
+		} else if (direction === -1) {
+                console.log("⚡ [Branch ENTERED] direction === -1");
                 console.log("⚡ [Executing Branch] direction === -1 -> Inserting AFTER target (or fallback)");
-                } else if (direction === -1) {
 			if (target.previousSibling !== activeEl) {
 				_silent = true;
 				Promise.resolve().then(() => { _silent = false; });
 
-				this.el.insertBefore(activeEl, target);
+				container.insertBefore(activeEl, target);
 			}
+			return true;
 		}
+		return false;
 	}
 
 	_onDragEnd() {

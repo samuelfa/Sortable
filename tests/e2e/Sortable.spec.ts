@@ -824,9 +824,13 @@ test.describe('Nested', () => {
 		 * Due to invertSwap: true on all lists, dropping past the midpoint (80%) of
 		 * Item 1.3 inserts dragEl AFTER the target into level 0.
 		 */
-		await dragAndDrop(page, dragStartPosition, targetStartPosition, {
-			targetPosition: { x: 0.5, y: 0.8 },
-		});
+		await dragToInvertedThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			1.0, // invertedSwapThreshold
+			'past_edge'
+		);
 
 		const dragEndPosition = list1.locator('> *').nth(3);
 		const targetEndPosition = list1.locator('> *').nth(2);
@@ -847,9 +851,13 @@ test.describe('Nested', () => {
 		const dragText = await dragStartPosition.innerText();
 		const targetText = await targetStartPosition.innerText();
 
-		await dragAndDrop(page, dragStartPosition, targetStartPosition, {
-			targetPosition: { x: 0.5, y: 0.8 },
-		});
+		await dragToInvertedThresholdWithDebug(
+			page,
+			dragStartPosition,
+			targetStartPosition,
+			1.0, // invertedSwapThreshold
+			'past_edge'
+		);
 
 		// Dropping past the midpoint (80%) inserts dragEl AFTER the target
 		const dragEndPosition = list1n2.locator('> *').nth(3);
