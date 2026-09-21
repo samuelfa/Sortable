@@ -169,6 +169,13 @@ export default class Sortable {
 		}
 	}
 
+	_isOutsideThisEl(target: HTMLElement): void {
+		if (!this.el.contains(target) && target !== this.el) {
+			// Reset lastTarget when target is outside this sortable's container
+			// This allows the drag to be handled by other sortables
+		}
+	}
+
 	_prepareStart(evt: Event) {
 		if (this.options.disabled) return;
 
@@ -257,6 +264,15 @@ export default class Sortable {
 
 							console.error(`[FALLBACK] TRIGGERED coords=(${coords.x},${coords.y}) elFromPoint=${elFromPoint.tagName}`);
 
+							// Check if target is outside the sortable that owns the dragged element (like JS _isOutsideThisEl)
+							const dragged = Sortable.dragged;
+							if (dragged && dragged.parentNode) {
+								const draggedSortable = (dragged.parentNode as any)[expando];
+								if (draggedSortable && draggedSortable._isOutsideThisEl) {
+									draggedSortable._isOutsideThisEl(elFromPoint);
+								}
+							}
+
 							// Traversia de cadena de padres (como JS original _emulateDragOver)
 							let target = elFromPoint;
 							let parent = target;
@@ -266,22 +282,25 @@ export default class Sortable {
 								parent = target;
 							}
 
-							// Walk up parent chain calling _onDragOver on each Sortable
+							// Walk up parent chain calling _onDragOver on each Sortable (like JS _emulateDragOver do...while)
 							let current = parent;
 							let depth = 0;
-							while (current) {
-								const sortable = (current as any)[expando];
-								if (sortable) {
-									// DEBUG
-									console.error(`[FALLBACK DEBUG] depth=${depth}, sortable.el.id=${sortable.el.id}, current.id=${current.id}, rootEl=${sortable.el.id}`);
-									// Pasar rootEl para que _onDragOver sepa en qué contenedor actuar (como JS original)
-									const evtWithRoot = { ...simulatedEvt, rootEl: current };
-									const inserted = sortable._onDragOver(evtWithRoot);
-									if (inserted && !sortable.options.dragoverBubble) {
-										break;
+							if (current) {
+								do {
+									const sortable = (current as any)[expando];
+									if (sortable) {
+										// DEBUG
+										console.error(`[FALLBACK DEBUG] depth=${depth}, sortable.el.id=${sortable.el.id}, current.id=${current.id}, rootEl=${sortable.el.id}`);
+										// Pasar rootEl para que _onDragOver sepa en qué contenedor actuar (como JS original)
+										const evtWithRoot = { ...simulatedEvt, rootEl: current };
+										const inserted = sortable._onDragOver(evtWithRoot);
+										if (inserted && !sortable.options.dragoverBubble) {
+											break;
+										}
 									}
-								}
-								current = getParentOrHost(current);
+									current = getParentOrHost(current);
+									depth++;
+								} while (current);
 							}
 						}
 					}
@@ -389,7 +408,7 @@ export default class Sortable {
 			return false;
 		}
 
-		const isOwner = activeEl.parentNode === this.el;
+		const isOwner = activeEl.parentNode === container;
 		const fromSortable = isOwner
 			? this
 			: (Sortable.active || (activeEl.parentNode ? Sortable.get(activeEl.parentNode as HTMLElement) : null));
@@ -408,16 +427,16 @@ export default class Sortable {
 		}
 
 		let target = evt.target as HTMLElement | null;
-		while (target && target.parentNode !== this.el) {
+		while (target && target.parentNode !== container) {
 			if ((target as any)[expando]) {
 				return false;
 			}
 			target = target.parentNode as HTMLElement | null;
 		}
 
-		if (!target || target === this.el) {
-			if (this.el.children.length === 0 && !isOwner) {
-				this.el.appendChild(activeEl);
+		if (!target || target === container) {
+			if (container.children.length === 0 && !isOwner) {
+				container.appendChild(activeEl);
 			}
 			return false;
 		}
@@ -463,7 +482,7 @@ export default class Sortable {
                 });
                 console.log("📐 [Swap Direction]", { direction });
 
-		if (direction === 0) return;
+		if (direction === 0) return false;
 
 		console.log("⚡ [Branch ENTERED] direction === 1");
                 console.log("⚡ [Executing Branch] direction === 1 -> Inserting BEFORE target");
